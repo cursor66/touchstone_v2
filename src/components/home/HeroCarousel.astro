@@ -1,0 +1,98 @@
+---
+/**
+ * Hero 轮播（设计稿还原）：3 张幻灯片、5s 自动播放、悬停暂停、
+ * 指示点 / 左右箭头交互，纯前端实现。
+ */
+import Icon from '../ui/Icon.astro';
+
+interface Slide {
+  title: string;
+  subtitle: string;
+  motto: string;
+  image: string;
+}
+
+interface Props {
+  slides: Slide[];
+}
+
+const { slides } = Astro.props;
+const n = slides.length;
+---
+
+<section id="hero" class="relative h-[250px] md:h-[320px] overflow-hidden group">
+  <div
+    id="hero-slider"
+    class="flex transition-transform duration-700 ease-in-out h-full"
+    style={`width: ${n * 100}%; transform: translateX(0%);`}
+  >
+    {slides.map((s) => (
+      <div class="relative h-full flex items-center shrink-0" style={`width: ${100 / n}%;`}>
+        <img src={s.image} alt={s.title} class="absolute inset-0 w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-black/40"></div>
+        <div class="relative max-w-7xl mx-auto px-4 w-full text-white">
+          <div class="max-w-2xl">
+            <h2 class="text-2xl md:text-4xl font-bold mb-3 md:mb-4 leading-tight">{s.title}</h2>
+            <p class="text-sm md:text-base text-gray-200 mb-4 md:mb-6">{s.subtitle}</p>
+            <div class="flex items-center space-x-3 text-[10px] md:text-xs text-gray-300">
+              <span class="w-10 md:w-16 h-[1px] bg-gray-400/50"></span>
+              <p class="italic tracking-[0.2em] font-light">{s.motto}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <!-- 指示点 -->
+  <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+    {slides.map((_, i) => (
+      <button
+        data-slide-to={i}
+        class={`w-2 h-2 rounded-full bg-white/50 hover:bg-white transition-all slider-dot ${i === 0 ? 'active' : ''}`}
+        aria-label={`第 ${i + 1} 张`}
+      ></button>
+    ))}
+  </div>
+
+  <!-- 左右箭头 -->
+  <button
+    data-slide-prev
+    class="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-black/20 hover:bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+    aria-label="上一张"
+  >
+    <Icon name="chevron-left" class="w-3.5 h-3.5" />
+  </button>
+  <button
+    data-slide-next
+    class="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-black/20 hover:bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+    aria-label="下一张"
+  >
+    <Icon name="chevron-right" class="w-3.5 h-3.5" />
+  </button>
+</section>
+
+<script is:inline define:vars={{ total: n }}>
+  (function () {
+    let current = 0;
+    const slider = document.getElementById('hero-slider');
+    const dots = document.querySelectorAll('.slider-dot');
+    const step = 100 / total;
+
+    function update() {
+      slider.style.transform = `translateX(-${current * step}%)`;
+      dots.forEach((d, i) => d.classList.toggle('active', i === current));
+    }
+    function next() { current = (current + 1) % total; update(); }
+    function prev() { current = (current - 1 + total) % total; update(); }
+
+    document.querySelector('[data-slide-next]').addEventListener('click', next);
+    document.querySelector('[data-slide-prev]').addEventListener('click', prev);
+    dots.forEach((d, i) => d.addEventListener('click', () => { current = i; update(); }));
+
+    let timer = setInterval(next, 5000);
+    const hero = document.getElementById('hero');
+    hero.addEventListener('mouseenter', () => clearInterval(timer));
+    hero.addEventListener('mouseleave', () => (timer = setInterval(next, 5000)));
+  })();
+</script>

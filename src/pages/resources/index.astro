@@ -1,0 +1,8 @@
+---
+import CollectionPage from '../../components/layout/CollectionPage.astro';
+import { getAllContent } from '../../utils/content';
+
+const items = (await getAllContent()).filter((i) => i.type === 'resource');
+---
+
+<CollectionPage title="学习资源" items={items} />

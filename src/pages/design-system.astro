@@ -1,0 +1,190 @@
+---
+/**
+ * 设计系统预览页（仅开发环境可访问）
+ * 用于验证组件复用效果与样式还原质量：颜色、字体、按钮、卡片、表单、布局。
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+import Select from '../components/ui/Select.astro';
+import SearchInput from '../components/ui/SearchInput.astro';
+import Icon from '../components/ui/Icon.astro';
+import ContentCard from '../components/cards/ContentCard.astro';
+import SeriesCard from '../components/cards/SeriesCard.astro';
+import SectionHeading from '../components/layout/SectionHeading.astro';
+import { series } from '../data/series';
+import { defaultAvatar } from '../data/site';
+
+if (!import.meta.env.DEV) {
+  return Astro.redirect('/');
+}
+
+const colors = [
+  { name: 'blue-600（主色）', class: 'bg-blue-600' },
+  { name: 'emerald-600（成长）', class: 'bg-emerald-600' },
+  { name: 'orange-600（影像）', class: 'bg-orange-600' },
+  { name: 'slate-900（深色区）', class: 'bg-slate-900' },
+  { name: 'gray-50（页面底）', class: 'bg-gray-50 border border-gray-200' },
+  { name: 'gray-900（标题）', class: 'bg-gray-900' },
+  { name: 'gray-500（次要）', class: 'bg-gray-500' },
+  { name: 'gray-400（辅助）', class: 'bg-gray-400' },
+];
+
+const gradients = [
+  { name: 'blue-50 → indigo-50', class: 'from-blue-50 to-indigo-50 border-blue-100' },
+  { name: 'emerald-50 → teal-50', class: 'from-emerald-50 to-teal-50 border-emerald-100' },
+  { name: 'orange-50 → amber-50', class: 'from-orange-50 to-amber-50 border-orange-100' },
+];
+
+const radii = [
+  { name: 'rounded-md（按钮/下拉）', class: 'rounded-md' },
+  { name: 'rounded-lg（Logo）', class: 'rounded-lg' },
+  { name: 'rounded-xl（卡片/图标块）', class: 'rounded-xl' },
+  { name: 'rounded-2xl（专题卡）', class: 'rounded-2xl' },
+  { name: 'rounded-full（搜索/头像）', class: 'rounded-full' },
+];
+---
+
+<BaseLayout title="设计系统预览">
+  <main class="max-w-7xl mx-auto px-4 py-12">
+    <div class="max-w-5xl mx-auto space-y-16">
+
+      <!-- 颜色 -->
+      <section>
+        <SectionHeading title="颜色 Colors" />
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {colors.map((c) => (
+            <div class="bg-white rounded-xl p-4 shadow-sm">
+              <div class={`h-12 rounded-lg mb-3 ${c.class}`}></div>
+              <p class="text-xs text-gray-500">{c.name}</p>
+            </div>
+          ))}
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          {gradients.map((g) => (
+            <div class={`bg-gradient-to-br ${g.class} border rounded-2xl p-6`}>
+              <p class="text-xs text-gray-500">{g.name}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- 字体 -->
+      <section>
+        <SectionHeading title="字体 Typography" />
+        <div class="bg-white rounded-xl p-8 shadow-sm space-y-4">
+          <p class="text-xs text-gray-400">字体族：Noto Sans SC（300 / 400 / 500 / 700）</p>
+          <h1 class="text-4xl font-bold leading-tight">标题 text-4xl font-bold</h1>
+          <h2 class="text-2xl font-bold">区块标题 text-2xl font-bold</h2>
+          <h3 class="text-xl font-bold">卡片标题 text-xl font-bold</h3>
+          <p class="text-sm text-gray-500 leading-relaxed">正文摘要 text-sm text-gray-500 leading-relaxed：系统探索 AI 工具如何改变阅读、写作与工作流。</p>
+          <p class="text-xs text-gray-400">辅助信息 text-xs text-gray-400</p>
+          <p class="italic tracking-[0.2em] font-light text-xs text-gray-300 bg-slate-900 inline-block px-3 py-1 rounded">座右铭 italic tracking-[0.2em]</p>
+        </div>
+      </section>
+
+      <!-- 按钮 -->
+      <section>
+        <SectionHeading title="按钮 Buttons" />
+        <div class="bg-white rounded-xl p-8 shadow-sm flex flex-wrap items-center gap-4">
+          <Button variant="primary">主要按钮</Button>
+          <Button variant="secondary">次要按钮</Button>
+          <Button variant="ghost" title="图标按钮"><Icon name="sun" class="w-5 h-5" /></Button>
+          <Button variant="primary" href="#">链接按钮</Button>
+        </div>
+      </section>
+
+      <!-- 圆角 -->
+      <section>
+        <SectionHeading title="圆角 Radius" />
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {radii.map((r) => (
+            <div class={`bg-blue-600 text-white text-xs p-4 h-20 flex items-center justify-center text-center ${r.class}`}>{r.name}</div>
+          ))}
+        </div>
+      </section>
+
+      <!-- 表单 -->
+      <section>
+        <SectionHeading title="表单 Forms" />
+        <div class="bg-white rounded-xl p-8 shadow-sm flex flex-wrap items-center gap-6">
+          <SearchInput class="w-64" />
+          <Select options={['全部内容', '文章专栏', '影像视频', '学习资源']} />
+        </div>
+      </section>
+
+      <!-- 卡片 -->
+      <section>
+        <SectionHeading title="卡片 Cards" />
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <ContentCard
+            title="文章卡片：type=article（无播放标）"
+            href="#"
+            cover={`https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent('minimal desk with notebook coffee and morning sunlight, study scene, soft focus photography')}&image_size=landscape_16_9`}
+            type="article"
+            author="卡卡"
+            avatar={defaultAvatar}
+            likes={93}
+            comments={24}
+          />
+          <ContentCard
+            title="视频卡片：type=video（悬浮显示播放标）"
+            href="#"
+            cover={`https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent('child holding camera photographing flowers in a sunny park, joyful candid moment, warm photography')}&image_size=landscape_16_9`}
+            type="video"
+            author="卡卡"
+            avatar={defaultAvatar}
+            likes={120}
+            comments={18}
+          />
+          <ContentCard
+            title="资源卡片：type=resource"
+            href="#"
+            cover={`https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent('stack of books with e-reader on wooden table, warm library light, cozy photography')}&image_size=landscape_16_9`}
+            type="resource"
+            author="卡卡"
+            avatar={defaultAvatar}
+            likes={73}
+            comments={14}
+          />
+        </div>
+      </section>
+
+      <!-- 系列专题卡 -->
+      <section>
+        <SectionHeading title="系列专题 SeriesCard" />
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {series.map((s) => (
+            <SeriesCard title={s.title} description={s.description} count={s.count} icon={s.icon} color={s.color} href={s.href} />
+          ))}
+        </div>
+      </section>
+
+      <!-- 图标 -->
+      <section>
+        <SectionHeading title="图标 Icons" />
+        <div class="bg-white rounded-xl p-8 shadow-sm flex flex-wrap gap-6 text-gray-600">
+          {(['mountain','search','sun','chevron-left','chevron-right','chevron-down','grid','ellipsis','play','heart','comment','share','arrow-right','robot','seedling','camera-retro','tiktok','book-open','weixin','envelope'] as const).map((n) => (
+            <div class="flex flex-col items-center gap-2 w-16">
+              <Icon name={n} class="w-5 h-5" />
+              <span class="text-[10px] text-gray-400">{n}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- 布局 -->
+      <section>
+        <SectionHeading title="布局 Layout" />
+        <div class="bg-white rounded-xl p-8 shadow-sm text-sm text-gray-500 space-y-2">
+          <p>· 页面容器：max-w-7xl mx-auto px-4</p>
+          <p>· 内容容器：max-w-5xl mx-auto（首页列表 / 列表页）</p>
+          <p>· 详情容器：max-w-2xl mx-auto（正文阅读）</p>
+          <p>· 卡片网格：grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6</p>
+          <p>· 专题网格：grid-cols-1 md:grid-cols-3 gap-8</p>
+          <p>· 区块间距：main py-12 / SectionHeading mb-8 / 卡片区 mt-16</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</BaseLayout>

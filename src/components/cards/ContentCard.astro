@@ -1,0 +1,59 @@
+---
+/**
+ * 内容卡片（设计稿 PostCard 还原）
+ * 文章 / 视频 / 资源三种类型共用此卡片：
+ * - type="video" 时封面右上角悬浮播放按钮
+ * - 通过 props 扩展，禁止复制样式新建相似卡片
+ */
+import Icon from '../ui/Icon.astro';
+import { defaultAvatar } from '../../data/site';
+
+interface Props {
+  title: string;
+  href: string;
+  cover: string;
+  type?: 'article' | 'video' | 'resource';
+  author?: string;
+  avatar?: string;
+  likes?: number;
+  comments?: number;
+}
+
+const {
+  title,
+  href,
+  cover,
+  type = 'article',
+  author = '卡卡',
+  avatar = defaultAvatar,
+  likes = 0,
+  comments = 0,
+} = Astro.props;
+---
+
+<div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+  <a href={href} class="block relative h-48">
+    <img src={cover} alt={title} class="w-full h-full object-cover" loading="lazy" />
+    {type === 'video' && (
+      <div class="absolute top-3 right-3 bg-black/50 text-white p-1.5 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
+        <Icon name="play" class="w-2.5 h-2.5" />
+      </div>
+    )}
+  </a>
+  <div class="p-5">
+    <h3 class="font-bold text-gray-900 mb-3 line-clamp-2 hover:text-blue-600 transition cursor-pointer">
+      <a href={href}>{title}</a>
+    </h3>
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <img src={avatar} alt={author} class="w-6 h-6 rounded-full" loading="lazy" />
+        <span class="text-xs text-gray-500">{author}</span>
+      </div>
+      <div class="flex items-center space-x-4 text-xs text-gray-400">
+        <span><Icon name="heart" class="inline w-3.5 h-3.5 mr-1" /> {likes}</span>
+        <span><Icon name="comment" class="inline w-3.5 h-3.5 mr-1" /> {comments}</span>
+        <button class="hover:text-blue-600" title="分享"><Icon name="share" class="w-3.5 h-3.5" /></button>
+      </div>
+    </div>
+  </div>
+</div>

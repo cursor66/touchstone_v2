@@ -1,0 +1,76 @@
+---
+/**
+ * 首页：Hero 轮播 + 内容工具栏 + 三类内容混排九宫格 + 精选系列专题
+ * 布局与样式 1:1 还原设计稿，数据来自 content/ 内容集合。
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroCarousel from '../components/home/HeroCarousel.astro';
+import ContentCard from '../components/cards/ContentCard.astro';
+import SeriesCard from '../components/cards/SeriesCard.astro';
+import SectionHeading from '../components/layout/SectionHeading.astro';
+import Button from '../components/ui/Button.astro';
+import Select from '../components/ui/Select.astro';
+import Icon from '../components/ui/Icon.astro';
+import { heroSlides } from '../data/hero';
+import { series } from '../data/series';
+import { getAllContent } from '../utils/content';
+
+const items = (await getAllContent()).slice(0, 9);
+---
+
+<BaseLayout>
+  <HeroCarousel slides={heroSlides} />
+
+  <main class="max-w-7xl mx-auto px-4 py-12">
+    <div class="max-w-5xl mx-auto">
+      <!-- 内容工具栏 -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
+        <div class="flex items-center space-x-4">
+          <Select options={['全部内容', '文章专栏', '影像视频', '学习资源']} />
+          <div class="h-4 w-px bg-gray-200 hidden md:block"></div>
+          <div class="flex space-x-2">
+            <Button variant="primary">最新发布</Button>
+            <Button variant="secondary">最热排行</Button>
+          </div>
+        </div>
+        <div class="flex items-center space-x-3 text-gray-400">
+          <button class="hover:text-blue-600 transition" title="网格视图"><Icon name="grid" class="w-4 h-4" /></button>
+          <button class="hover:text-blue-600 transition" title="更多"><Icon name="ellipsis" class="w-4 h-4" /></button>
+        </div>
+      </div>
+
+      <!-- 内容九宫格（文章 / 视频 / 资源混排） -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {items.map(({ entry, href, type }) => (
+          <ContentCard
+            title={entry.data.title}
+            href={href}
+            cover={entry.data.cover}
+            type={type}
+            author={entry.data.author}
+            avatar={entry.data.avatar}
+            likes={entry.data.likes}
+            comments={entry.data.comments}
+          />
+        ))}
+      </div>
+
+      <!-- 精选系列专题 -->
+      <div class="mt-16">
+        <SectionHeading title="精选系列专题" linkText="查看所有专题" linkHref="/articles/" />
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {series.map((s) => (
+            <SeriesCard
+              title={s.title}
+              description={s.description}
+              count={s.count}
+              icon={s.icon}
+              color={s.color}
+              href={s.href}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

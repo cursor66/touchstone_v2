@@ -1,0 +1,68 @@
+---
+/**
+ * 内容详情页模板：三类内容的详情页共用。
+ * - article：标准正文排版
+ * - video：正文前显示观看入口
+ * - resource：正文前显示下载 / GitHub 入口
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Button from '../ui/Button.astro';
+import Icon from '../ui/Icon.astro';
+import type { AnyEntry } from '../../utils/content';
+
+interface Props {
+  entry: AnyEntry;
+  type: 'article' | 'video' | 'resource';
+}
+
+const { entry, type } = Astro.props;
+const { data } = entry;
+const dateText = data.date.toLocaleDateString('zh-CN');
+---
+
+<BaseLayout title={data.title} description={data.summary}>
+  <main class="max-w-7xl mx-auto px-4 py-12">
+    <article class="max-w-2xl mx-auto">
+      <h1 class="text-3xl font-bold text-gray-900 leading-tight mb-4">{data.title}</h1>
+      <div class="flex items-center space-x-4 text-xs text-gray-400 mb-6">
+        <span>{data.author}</span>
+        <span>{dateText}</span>
+        <span class="flex items-center"><Icon name="heart" class="w-3.5 h-3.5 mr-1" /> {data.likes}</span>
+        <span class="flex items-center"><Icon name="comment" class="w-3.5 h-3.5 mr-1" /> {data.comments}</span>
+      </div>
+
+      <img src={data.cover} alt={data.title} class="w-full rounded-xl mb-8" />
+
+      {(type === 'video' && data.videoUrl) && (
+        <div class="mb-8">
+          <Button href={data.videoUrl} class="w-full sm:w-auto">
+            <Icon name="play" class="w-3 h-3 mr-2" /> 观看视频
+          </Button>
+        </div>
+      )}
+
+      {(type === 'resource' && (data.downloadUrl || data.githubUrl)) && (
+        <div class="flex flex-wrap gap-3 mb-8">
+          {data.downloadUrl && (
+            <Button href={data.downloadUrl}>立即下载</Button>
+          )}
+          {data.githubUrl && (
+            <Button href={data.githubUrl} variant="secondary">GitHub 仓库</Button>
+          )}
+        </div>
+      )}
+
+      <div class="prose-content">
+        <slot />
+      </div>
+
+      {data.tags.length > 0 && (
+        <div class="flex flex-wrap gap-2 mt-10">
+          {data.tags.map((tag) => (
+            <span class="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full">{tag}</span>
+          ))}
+        </div>
+      )}
+    </article>
+  </main>
+</BaseLayout>

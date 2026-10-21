@@ -1,0 +1,30 @@
+---
+/**
+ * 按钮组件（设计稿还原）
+ * variant: primary（蓝底白字）| secondary（白底灰字描边）| ghost（图标按钮）
+ * 使用 <Button href="/x"> 渲染为链接，否则渲染为 <button>。
+ */
+interface Props {
+  variant?: 'primary' | 'secondary' | 'ghost';
+  href?: string;
+  type?: 'button' | 'submit';
+  class?: string;
+  title?: string;
+}
+
+const { variant = 'primary', href, type = 'button', class: className = '', title } = Astro.props;
+
+const base = 'px-6 py-2 rounded-md text-sm font-medium shadow-sm transition inline-flex items-center justify-center';
+const variants = {
+  primary: 'bg-blue-600 text-white',
+  secondary: 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50',
+  ghost: 'p-2 text-gray-500 hover:text-blue-600 shadow-none',
+};
+const classes = `${base} ${variants[variant]} ${className}`;
+---
+
+{href ? (
+  <a href={href} class={classes} title={title}><slot /></a>
+) : (
+  <button type={type} class={classes} title={title}><slot /></button>
+)}

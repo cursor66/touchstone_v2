@@ -1,0 +1,765 @@
+!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:{},r=(new e.Error).stack;r&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[r]="05ee3861-f448-4bf3-9969-8f60fd62ab88",e._sentryDebugIdIdentifier="sentry-dbid-05ee3861-f448-4bf3-9969-8f60fd62ab88")}catch(e){}}();"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[22967],{16329:(e,r,t)=>{t.d(r,{b:()=>a});var o=t(12115),n=t(47650),c=t(87169);let l=[];function a(e,r,t){let a="string"==typeof e?e:null,[i,s]=(0,o.useState)(null),f=null!==a&&!a.includes("uxp-asset://");return((0,o.useEffect)(()=>{let e,o,l;if(null===a||f)return;let i=!0,u=0,d=null,h=0,p=null,y=e=>Math.max(1,Math.min(0x7fffffff,e)),m=e=>{u=0,d=null,clearTimeout(o),s(o=>({source:a,scope:t,lookup:r,html:null,error:e,bindings:o?.source===a&&o.scope===t&&o.lookup===r?o.bindings:[]}))},b=async()=>{if(!i)return;clearTimeout(e),l?.abort();let f=new AbortController;l=f,Date.now()>=u?m(null):Number.isFinite(u)&&(clearTimeout(o),o=setTimeout(()=>m(p),y(u-Date.now())));try{let l=await (0,c.oZ)(a,r,{signal:f.signal});if(!i||f.signal.aborted)return;if(clearTimeout(o),h=0,p=null,l.html!==d&&(null!==d&&(0,n.flushSync)(()=>m(null)),d=l.html,s({source:a,scope:t,lookup:r,html:l.html,error:null,bindings:l.bindings})),u=l.expiresAt??1/0,null!==l.refreshAt){let r=l.refreshAt-Date.now(),t=Math.random()*Math.min(18e5,Math.max(0,r)/4);e=setTimeout(()=>void b(),y(r-t))}}catch(n){if(!i||f.signal.aborted)return;let r=n instanceof Error&&["AUTH_REQUIRED","ACCESS_DENIED"].includes(n.message),t=n instanceof Error?n:Error("LABS_ASSET_RESOLUTION_FAILED"),o=()=>{let r;e=setTimeout(()=>void b(),(r=h++,Math.min(3e4,5e3*2**r)*(.5+Math.random()/2)))};if(!r&&Date.now()<u){p=t,o();return}m(t),r||o()}},v=()=>{"visible"===document.visibilityState&&b()};return document.addEventListener("visibilitychange",v),b(),()=>{i=!1,clearTimeout(e),clearTimeout(o),l?.abort(),document.removeEventListener("visibilitychange",v)}},[a,r,t,f]),f)?{html:a,error:null,bindings:l}:i?.source!==a||i?.scope!==t||i?.lookup!==r?{html:null,error:null,bindings:[]}:{html:i.html,error:i.error,bindings:i.bindings}}},23988:(e,r,t)=>{t.d(r,{L:()=>n});var o=t(25022);function n(e){if("string"!=typeof e||!e.trim()||/cdn\.tailwindcss\.com/i.test(e)||/<link\b[^>]*\bhref=["'][^"']*tailwind[^"']*\.css\b[^"']*["']/i.test(e)||!(/<script\b[^>]*\bsrc=["'][^"']*tailwind[^"']*["']/i.test(e)||/tailwind\.config\s*=/.test(e)))return e;let r=`<script src="${o.ts}"></script>`,t=/<head[^>]*>/i.exec(e)??/<html[^>]*>/i.exec(e)??/<!doctype[^>]*>/i.exec(e);if(!t)return`${r}
+${e}`;let n=t.index+t[0].length;return`${e.slice(0,n)}
+${r}${e.slice(n)}`}},27625:(e,r,t)=>{t.r(r),t.d(r,{LABS_MAX_VIDEO_BYTES:()=>c,LabsUploadError:()=>i,createLabsAssetLookup:()=>p,labsVideoUploadName:()=>a,uploadLabsAsset:()=>h});var o=t(13503);let n=async()=>(await t.e(93696).then(t.bind(t,93696))).default(),c=0x3200000,l={"video/mp4":"mp4","video/webm":"webm"};function a(e,r){let t=l[e.type];return!t||e.size>c?null:`${r.replace(/\.[^./]+$/,"")||"video"}.${t}`}class i extends Error{constructor(e,r){super(e),this.code=e,this.status=r,this.name="LabsUploadError"}}async function s(e){let r=await e.arrayBuffer();return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",r)),e=>e.toString(16).padStart(2,"0")).join("")}function f(e){return{base:e.apiBase??`${o.URLS.streamUrl}/labs`,token:e.getToken??n,fetcher:e.fetcher??((e,r)=>fetch(e,r))}}async function u(e,r,t){let o=f(t),n=await o.token(),c=await o.fetcher(e,{method:"POST",headers:{Authorization:`Bearer ${n}`,"Content-Type":"application/json"},body:JSON.stringify(r),signal:t.signal}),l=await c.json().catch(()=>({}));if(!c.ok)throw new i(l.code||"LABS_UPLOAD_FAILED",c.status);return l}async function d(e,r){try{return await e()}catch(t){if(t instanceof i&&t.status&&t.status<500)throw t;return r&&await new Promise(e=>setTimeout(e,r)),e()}}async function h(e){let r=f(e),t=await s(e.file),o={idempotencyKey:e.idempotencyKey,draftId:e.draftId,kind:e.kind,contentType:e.file.type,fileName:e.file.name,size:e.file.size,sha256:t,draftTotalBytes:e.draftTotalBytes,...e.modelName?{modelName:e.modelName}:{},...void 0!==e.frameTimeSeconds?{frameTimeSeconds:e.frameTimeSeconds}:{}},n=null;try{let t=await d(()=>u(`${r.base}/assets/uploads`,o,e),e.retryDelayMs??250);if(n=t.assetId,"ready"===t.status&&t.reference)return{assetId:t.assetId,reference:t.reference};await d(async()=>{let o=await r.fetcher(t.upload.url,{method:t.upload.method??"PUT",headers:t.upload.headers,body:e.file,signal:e.signal});if(!o.ok)throw new i("UPLOAD_TRANSFER_FAILED",o.status);return o},e.retryDelayMs??250);let c=await d(()=>u(`${r.base}/assets/${encodeURIComponent(n)}/complete`,{},e),e.retryDelayMs??250);return{assetId:c.assetId,reference:c.reference}}catch(t){throw n&&!e.keepSessionOnAbort&&(e.signal?.aborted||"AbortError"===t.name)&&await u(`${r.base}/assets/${encodeURIComponent(n)}/cancel`,{},{...e,signal:void 0}).catch(()=>void 0),t}}function p(e){let r=f(e);return async(t,o)=>(await u(`${r.base}/assets/resolve`,{assetIds:t,...e.designId?{designId:e.designId}:{}},{...e,signal:o})).assets}},32422:(e,r,t)=>{t.d(r,{I3:()=>p,LJ:()=>h,MD:()=>f,Pf:()=>w,Qo:()=>a,Sk:()=>E,T5:()=>u,WN:()=>l,Xb:()=>b,Z8:()=>s,bh:()=>m,cj:()=>y,kh:()=>v,tD:()=>x,wS:()=>S,xO:()=>i,x_:()=>A,xl:()=>d,yo:()=>g});var o=t(68680),n=t(49680),c=t(67344);let l=e=>!!e&&("failed"===e.status||"cancelled"===e.status||"cancelled"===e.reactStatus),a=e=>!!e&&"failed"===e.status,i=e=>(e=>!!(e?.reactStatus==="cancelled"||e?.status==="cancelled"||e?.isReactProject))(e)?"cancelled":e?.error?"failed":(e?.isLoading||e?.status==="generating")&&!e.wireframeOutputHtml?"generating":"completed",s=(e,r,t)=>r&&t?{width:r,height:t}:e===o.fD.MOBILE||e===o.fD.MOBILELEGACY?{width:375,height:840}:e===o.fD.DESKTOPHD?{width:1920,height:1080}:e===o.fD.TABLET?{width:1024,height:1366}:e===o.fD.DESKTOP||e===o.fD.DESKTOPLEGACY?{width:1440,height:1024}:e===o.fD.PRESENTATION_LANDSCAPE?{width:1920,height:1080}:e===o.fD.PRESENTATION_PORTRAIT?{width:1080,height:1920}:{width:1440,height:1024};function f(e,r,t){let n=r?.props?.w??r?.props?.dimensions?.width,c=r?.props?.h??r?.props?.dimensions?.height;if("number"==typeof n&&n>0&&"number"==typeof c&&c>0)return{width:n,height:c};let l=e?.dimensions;if(l&&l.width>0&&l.height>0)return{width:l.width,height:l.height};let a=e?.width,i=e?.height;return"number"==typeof a&&a>0&&"number"==typeof i&&i>0?{width:a,height:i}:s(t||o.fD.DESKTOP,"number"==typeof a?a:void 0,"number"==typeof i?i:void 0)}function u(e,r,t,o){let n=f(e,r,o);return t&&"number"==typeof t.width&&t.width>0&&"number"==typeof t.height&&t.height>0?{width:n.width,height:Math.max(n.height,t.height)}:n}function d(e,r,t){return e?s(r||o.fD.DESKTOP):t}let h=(e,r)=>r||s(e).width,p=(e,r)=>r||s(e).height,y=e=>{if(!e)return;if(e.useCase)return e.useCase;if(!(0,c.oZ)(e))return;let r=e.dimensions?.width;return"number"==typeof r&&r>0&&r<=600?o.fD.MOBILE:o.fD.DESKTOP},m=e=>!!e&&(e===o.fD.DESKTOP||e===o.fD.DESKTOPHD||e===o.fD.DESKTOPLEGACY),b=e=>!!e&&(e===o.fD.MOBILE||e===o.fD.MOBILELEGACY),v=e=>e?e===o.fD.DESKTOP||e===o.fD.DESKTOPLEGACY?"website":e===o.fD.MOBILE||e===o.fD.MOBILELEGACY?"mobile":null:null;function g(e){return!!e&&!1!==e.isReactProject&&("react-project"===e.designMode?!0===e.isReactProject||void 0===e.isReactProject:!0===e.isReactProject&&!0===e.isPrototype)}function w(e){return!!e?.isReactProject&&!!e?.isPrototype&&(0,n.CF)(e)}let x="Build in progress. This action can't be completed until the build finishes.";function S(e,r){return!0===e||r?.isReactProject===!0}function E(e){return!!e&&"react-project"===e.designMode&&!1!==e.isReactProject&&(!0===e.isReactProject||void 0===e.isReactProject)}function A(e){return e&&e.includes(" - ")?e.split(" - ")[0]:""}},35306:(e,r,t)=>{t.d(r,{Fv:()=>i,Jb:()=>h,Lh:()=>s,Mb:()=>p,Pt:()=>m,Qs:()=>y,X5:()=>n,bi:()=>b,ly:()=>f,q7:()=>v,wy:()=>o,yU:()=>u});let o={sandboxId:null,machineId:null,livePreviewURL:null,sandboxExpiresAt:null,sandboxURL:null,sandboxPreviewURL:null};function n(e){let r=c(e);return!(!(!r||"gc_cleaned"===a(r.sandboxStatus)||i(r))&&l(r))||!a(r.sandboxPausedAt)}function c(e){if(!e||"object"!=typeof e)return null;if("wireframe"in e){let r=e.wireframe;return r&&"object"==typeof r?r:null}return e}function l(e){if(!e)return null;for(let r of[e.sandboxId,e.machineId])if("string"==typeof r&&r.trim())return r.trim();return null}function a(e){return"string"==typeof e&&e.trim()?e.trim():null}function i(e){let r=c(e);if(!r)return!1;let t=a(r.livePreviewURL)||a(r.livePreviewUrl)||a(r.sandboxPreviewURL);return!!t&&[a(r.buildUrl),a(r.sandboxURL),a(r.cloudflareUrl),a(r.cloudflareURL)].filter(e=>!!e).some(e=>e===t)}function s(e){let r=c(e);return!!r&&!!(a(r.livePreviewURL)||a(r.livePreviewUrl)||a(r.sandboxPreviewURL)||l(r))}function f(e){let r=c(e);if(!r||i(r))return null;let t=a(r.livePreviewURL)||a(r.sandboxPreviewURL)||null,o=l(r);return t&&o?{previewURL:t,sandboxId:o}:null}function u(e){if(!e||"object"!=typeof e)return null;let r=e.parentVersionSandbox;return r?.wireframeId&&s(r)?r:null}function d(e,r){if(!r||r.parentVersionSandbox?.wireframeId!==e)return null;let t=r.parentVersionSandbox;return t&&t.wireframeId===e?f(t):null}function h(e){return l(c(e))}function p(e){let{parentWireframeId:r,polledChild:t,polledParent:o}=e,n=t?h(t):null;if(o&&s(o)){let e=h(o);return!n||e!==n}let c=t?u(t):null;if(c?.wireframeId!==r||!s(c))return!1;let l=h(c);return!n||l!==n}function y(e){let{targetWireframeId:r,getWireframeById:t,getVersionWireframeIds:o,sessionCache:n,activeWireframeId:c}=e,l=function(e,r,t){if(!r||r===e)return!1;let o=t(r);return o?.parentId===e}(r,c,t),a=e=>!e||l&&function(e,r,t){if(!r)return!1;let o=h(t(r));return!!(o&&e.sandboxId===o)}(e,c,t)?null:e;if(l&&c){let e=a(d(r,t(c)));if(e)return e}for(let e of o?.()??[]){if(e===r)continue;let o=a(d(r,t(e)));if(o)return o}let i=a(n?.get(r)??null);if(i)return i;let s=a(f(t(r)));if(s)return s;if(c&&!l){let e=a(d(r,t(c)));if(e)return e}return null}function m(e,r){let t=l(e)||l(r);return{livePreviewURL:a(e?.livePreviewURL)||a(r?.livePreviewURL),sandboxExpiresAt:a(e?.sandboxExpiresAt)||a(r?.sandboxExpiresAt),sandboxId:t,machineId:a(e?.machineId)||a(e?.sandboxId)||a(r?.machineId)||a(r?.sandboxId)||t}}function b(e,r){return{...m(e,r),sandboxStatus:a(e?.sandboxStatus)||a(r?.sandboxStatus)||null,sandboxPausedAt:a(e?.sandboxPausedAt)||a(r?.sandboxPausedAt)||null}}function v(e,r){let t=b(e,r);return s(t)?{...t,sandboxStatus:a(e.sandboxStatus)||t.sandboxStatus||"paused",sandboxPausedAt:a(e.sandboxPausedAt)||t.sandboxPausedAt||null}:t}},43559:(e,r,t)=>{t.d(r,{A:()=>E});var o=t(12115);let n=`
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+      window.FontAwesomeConfig = {
+          autoReplaceSvg: 'nest', // Options: 'nest', 'remove', 'replace'
+      };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+`,c=`
+<style>
+  * {
+    font-family: "{{font}}", sans-serif;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+</style>
+`,l=`
+<style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+</style>
+`,a=`
+<style>
+   :root {
+          /* Base colors */
+          --color-base: #ffffff;
+          --color-base-50: #f9fafb;
+          --color-base-100: #f3f4f6;
+          --color-base-200: #e5e7eb;
+          --color-base-300: #d1d5db;
+          --color-base-400: #9ca3af;
+          --color-base-500: #6b7280;
+          --color-base-600: #4b5563;  
+          --color-base-700: #374151;
+          --color-base-800: #1f2937;  
+          --color-base-900: #111827;
+          --color-base-content: #1f2937;
+
+          /* Primary colors */
+          --color-primary: #3b82f6;
+          --color-primary-50: #eff6ff;
+          --color-primary-100: #dbeafe;
+          --color-primary-200: #bfdbfe;
+          --color-primary-300: #93c5fd;
+          --color-primary-400: #60a5fa;
+          --color-primary-500: #3b82f6;
+          --color-primary-600: #2563eb;
+          --color-primary-700: #1d4ed8;
+          --color-primary-800: #1e40af;
+          --color-primary-900: #1e3a8a;
+          --color-primary-focus: #2563eb;
+          --color-primary-content: #ffffff;
+
+          /* Secondary colors */
+          --color-secondary: #8b5cf6;
+          --color-secondary-50: #f5f3ff;
+          --color-secondary-100: #ede9fe;
+          --color-secondary-200: #ddd6fe;
+          --color-secondary-300: #c4b5fd;
+          --color-secondary-400: #a78bfa;
+          --color-secondary-500: #8b5cf6;
+          --color-secondary-600: #7c3aed;
+          --color-secondary-700: #6d28d9;
+          --color-secondary-800: #5b21b6;
+          --color-secondary-900: #4c1d95;
+          --color-secondary-focus: #7c3aed;
+          --color-secondary-content: #ffffff;
+
+          /* Accent colors */
+          --color-accent: #f472b6;
+          --color-accent-50: #fdf2f8;
+          --color-accent-100: #fce7f3;
+          --color-accent-200: #fbcfe8;
+          --color-accent-300: #f9a8d4;
+          --color-accent-400: #f472b6;
+          --color-accent-500: #ec4899;
+          --color-accent-600: #db2777;
+          --color-accent-700: #be185d;
+          --color-accent-800: #9d174d;
+          --color-accent-900: #831843;
+          --color-accent-focus: #db2777;
+          --color-accent-content: #ffffff;
+
+          /* Neutral colors */
+          --color-neutral: #6b7280;
+          --color-neutral-50: #f9fafb;
+          --color-neutral-100: #f3f4f6;
+          --color-neutral-200: #e5e7eb;
+          --color-neutral-300: #d1d5db;
+          --color-neutral-400: #9ca3af;
+          --color-neutral-500: #6b7280;
+          --color-neutral-600: #4b5563;
+          --color-neutral-700: #374151;
+          --color-neutral-800: #1f2937;
+          --color-neutral-900: #111827;
+          --color-neutral-focus: #4b5563;
+          --color-neutral-content: #ffffff;
+
+          /* Info colors */
+          --color-info: #3b82f6;
+          --color-info-50: #eff6ff;
+          --color-info-100: #dbeafe;
+          --color-info-200: #bfdbfe;
+          --color-info-300: #93c5fd;
+          --color-info-400: #60a5fa;
+          --color-info-500: #3b82f6;
+          --color-info-600: #2563eb;
+          --color-info-700: #1d4ed8;
+          --color-info-800: #1e40af;
+          --color-info-900: #1e3a8a;
+          --color-info-focus: #2563eb;
+          --color-info-content: #ffffff;
+
+          /* Success colors */
+          --color-success: #10b981;
+          --color-success-50: #ecfdf5;
+          --color-success-100: #d1fae5;
+          --color-success-200: #a7f3d0;
+          --color-success-300: #6ee7b7;
+          --color-success-400: #34d399;
+          --color-success-500: #10b981;
+          --color-success-600: #059669;
+          --color-success-700: #047857;
+          --color-success-800: #065f46;
+          --color-success-900: #064e3b;
+          --color-success-focus: #059669;
+          --color-success-content: #ffffff;
+
+          /* Warning colors */
+          --color-warning: #f59e0b;
+          --color-warning-50: #fffbeb;
+          --color-warning-100: #fef3c7;
+          --color-warning-200: #fde68a;
+          --color-warning-300: #fcd34d;
+          --color-warning-400: #fbbf24;
+          --color-warning-500: #f59e0b;
+          --color-warning-600: #d97706;
+          --color-warning-700: #b45309;
+          --color-warning-800: #92400e;
+          --color-warning-900: #78350f;
+          --color-warning-focus: #d97706;
+          --color-warning-content: #ffffff;
+
+          /* Error colors */
+          --color-error: #ef4444;
+          --color-error-50: #fef2f2;
+          --color-error-100: #fee2e2;
+          --color-error-200: #fecaca;
+          --color-error-300: #fca5a5;
+          --color-error-400: #f87171;
+          --color-error-500: #ef4444;
+          --color-error-600: #dc2626;
+          --color-error-700: #b91c1c;
+          --color-error-800: #991b1b;
+          --color-error-900: #7f1d1d;
+          --color-error-focus: #dc2626;
+          --color-error-content: #ffffff;
+        }
+</style>
+`,i=`
+<style>
+/* Dark theme */
+        .dark {
+          /* Base colors */
+          --color-base: #1f2937;
+          --color-base-50: #111827;
+          --color-base-100: #1f2937;
+          --color-base-200: #374151;
+          --color-base-300: #4b5563;
+          --color-base-400: #6b7280;
+          --color-base-500: #9ca3af;
+          --color-base-600: #d1d5db;
+          --color-base-700: #e5e7eb;
+          --color-base-800: #f3f4f6;
+          --color-base-900: #f9fafb;
+          --color-base-content: #f9fafb;
+
+          /* Primary colors */
+          --color-primary: #60a5fa;
+          --color-primary-50: #1e3a8a;
+          --color-primary-100: #1e40af;
+          --color-primary-200: #1d4ed8;
+          --color-primary-300: #2563eb;
+          --color-primary-400: #3b82f6;
+          --color-primary-500: #60a5fa;
+          --color-primary-600: #93c5fd;
+          --color-primary-700: #bfdbfe;
+          --color-primary-800: #dbeafe;
+          --color-primary-900: #eff6ff;
+          --color-primary-focus: #3b82f6;
+          --color-primary-content: #1f2937;
+
+          /* Secondary colors */
+          --color-secondary: #a78bfa;
+          --color-secondary-50: #4c1d95;
+          --color-secondary-100: #5b21b6;
+          --color-secondary-200: #6d28d9;
+          --color-secondary-300: #7c3aed;
+          --color-secondary-400: #8b5cf6;
+          --color-secondary-500: #a78bfa;
+          --color-secondary-600: #c4b5fd;
+          --color-secondary-700: #ddd6fe;
+          --color-secondary-800: #ede9fe;
+          --color-secondary-900: #f5f3ff;
+          --color-secondary-focus: #8b5cf6;
+          --color-secondary-content: #1f2937;
+
+          /* Accent colors */
+          --color-accent: #f472b6;
+          --color-accent-50: #831843;
+          --color-accent-100: #9d174d;
+          --color-accent-200: #be185d;
+          --color-accent-300: #db2777;
+          --color-accent-400: #ec4899;
+          --color-accent-500: #f472b6;
+          --color-accent-600: #f9a8d4;
+          --color-accent-700: #fbcfe8;
+          --color-accent-800: #fce7f3;
+          --color-accent-900: #fdf2f8;
+          --color-accent-focus: #ec4899;
+          --color-accent-content: #1f2937;
+
+          /* Neutral colors remain the same as light theme */
+
+          /* Info colors */
+          --color-info: #60a5fa;
+          --color-info-50: #1e3a8a;
+          --color-info-100: #1e40af;
+          --color-info-200: #1d4ed8;
+          --color-info-300: #2563eb;
+          --color-info-400: #3b82f6;
+          --color-info-500: #60a5fa;
+          --color-info-600: #93c5fd;
+          --color-info-700: #bfdbfe;
+          --color-info-800: #dbeafe;
+          --color-info-900: #eff6ff;
+          --color-info-focus: #3b82f6;
+          --color-info-content: #1f2937;
+
+          /* Success colors */
+          --color-success: #34d399;
+          --color-success-50: #064e3b;
+          --color-success-100: #065f46;
+          --color-success-200: #047857;
+          --color-success-300: #059669;
+          --color-success-400: #10b981;
+          --color-success-500: #34d399;
+          --color-success-600: #6ee7b7;
+          --color-success-700: #a7f3d0;
+          --color-success-800: #d1fae5;
+          --color-success-900: #ecfdf5;
+          --color-success-focus: #10b981;
+          --color-success-content: #1f2937;
+
+          /* Warning colors */
+          --color-warning: #fbbf24;
+          --color-warning-50: #78350f;
+          --color-warning-100: #92400e;
+          --color-warning-200: #b45309;
+          --color-warning-300: #d97706;
+          --color-warning-400: #f59e0b;
+          --color-warning-500: #fbbf24;
+          --color-warning-600: #fcd34d;
+          --color-warning-700: #fde68a;
+          --color-warning-800: #fef3c7;
+          --color-warning-900: #fffbeb;
+          --color-warning-focus: #f59e0b;
+          --color-warning-content: #1f2937;
+
+          /* Error colors */
+          --color-error: #f87171;
+          --color-error-50: #7f1d1d;
+          --color-error-100: #991b1b;
+          --color-error-200: #b91c1c;
+          --color-error-300: #dc2626;
+          --color-error-400: #ef4444;
+          --color-error-500: #f87171;
+          --color-error-600: #fca5a5;
+          --color-error-700: #fecaca;
+          --color-error-800: #fee2e2;
+          --color-error-900: #fef2f2;
+          --color-error-focus: #ef4444;
+          --color-error-content: #1f2937;
+        }
+</style>
+`,s=`
+  <script>
+        tailwind.config = {
+            theme: {
+              extend: {
+                colors: {
+                ...${JSON.stringify({transparent:"transparent",current:"currentColor",black:"#000000",white:"#ffffff",gray:{50:"#f9fafb",100:"#f3f4f6",200:"#e5e7eb",300:"#d1d5db",400:"#9ca3af",500:"#6b7280",600:"#4b5563",700:"#374151",800:"#1f2937",900:"#111827"},red:{50:"#fef2f2",100:"#fee2e2",200:"#fecaca",300:"#fca5a5",400:"#f87171",500:"#ef4444",600:"#dc2626",700:"#b91c1c",800:"#991b1b",900:"#7f1d1d"},yellow:{50:"#fffbeb",100:"#fef3c7",200:"#fde68a",300:"#fcd34d",400:"#fbbf24",500:"#f59e0b",600:"#d97706",700:"#b45309",800:"#92400e",900:"#78350f"},green:{50:"#ecfdf5",100:"#d1fae5",200:"#a7f3d0",300:"#6ee7b7",400:"#34d399",500:"#10b981",600:"#059669",700:"#047857",800:"#065f46",900:"#064e3b"},blue:{50:"#eff6ff",100:"#dbeafe",200:"#bfdbfe",300:"#93c5fd",400:"#60a5fa",500:"#3b82f6",600:"#2563eb",700:"#1d4ed8",800:"#1e40af",900:"#1e3a8a"},indigo:{50:"#eef2ff",100:"#e0e7ff",200:"#c7d2fe",300:"#a5b4fc",400:"#818cf8",500:"#6366f1",600:"#4f46e5",700:"#4338ca",800:"#3730a3",900:"#312e81"},purple:{50:"#f5f3ff",100:"#ede9fe",200:"#ddd6fe",300:"#c4b5fd",400:"#a78bfa",500:"#8b5cf6",600:"#7c3aed",700:"#6d28d9",800:"#5b21b6",900:"#4c1d95"},pink:{50:"#fdf2f8",100:"#fce7f3",200:"#fbcfe8",300:"#f9a8d4",400:"#f472b6",500:"#ec4899",600:"#db2777",700:"#be185d",800:"#9d174d",900:"#831843"}})},
+                ...${JSON.stringify({primary:{DEFAULT:"var(--color-primary)",50:"var(--color-primary-50)",100:"var(--color-primary-100)",200:"var(--color-primary-200)",300:"var(--color-primary-300)",400:"var(--color-primary-400)",500:"var(--color-primary-500)",600:"var(--color-primary-600)",700:"var(--color-primary-700)",800:"var(--color-primary-800)",900:"var(--color-primary-900)",focus:"var(--color-primary-focus)",content:"var(--color-primary-content)"},secondary:{DEFAULT:"var(--color-secondary)",50:"var(--color-secondary-50)",100:"var(--color-secondary-100)",200:"var(--color-secondary-200)",300:"var(--color-secondary-300)",400:"var(--color-secondary-400)",500:"var(--color-secondary-500)",600:"var(--color-secondary-600)",700:"var(--color-secondary-700)",800:"var(--color-secondary-800)",900:"var(--color-secondary-900)",focus:"var(--color-secondary-focus)",content:"var(--color-secondary-content)"},accent:{DEFAULT:"var(--color-accent)",50:"var(--color-accent-50)",100:"var(--color-accent-100)",200:"var(--color-accent-200)",300:"var(--color-accent-300)",400:"var(--color-accent-400)",500:"var(--color-accent-500)",600:"var(--color-accent-600)",700:"var(--color-accent-700)",800:"var(--color-accent-800)",900:"var(--color-accent-900)",focus:"var(--color-accent-focus)",content:"var(--color-accent-content)"},neutral:{DEFAULT:"var(--color-neutral)",50:"var(--color-neutral-50)",100:"var(--color-neutral-100)",200:"var(--color-neutral-200)",300:"var(--color-neutral-300)",400:"var(--color-neutral-400)",500:"var(--color-neutral-500)",600:"var(--color-neutral-600)",700:"var(--color-neutral-700)",800:"var(--color-neutral-800)",900:"var(--color-neutral-900)",focus:"var(--color-neutral-focus)",content:"var(--color-neutral-content)"},info:{DEFAULT:"var(--color-info)",50:"var(--color-info-50)",100:"var(--color-info-100)",200:"var(--color-info-200)",300:"var(--color-info-300)",400:"var(--color-info-400)",500:"var(--color-info-500)",600:"var(--color-info-600)",700:"var(--color-info-700)",800:"var(--color-info-800)",900:"var(--color-info-900)",focus:"var(--color-info-focus)",content:"var(--color-info-content)"},success:{DEFAULT:"var(--color-success)",50:"var(--color-success-50)",100:"var(--color-success-100)",200:"var(--color-success-200)",300:"var(--color-success-300)",400:"var(--color-success-400)",500:"var(--color-success-500)",600:"var(--color-success-600)",700:"var(--color-success-700)",800:"var(--color-success-800)",900:"var(--color-success-900)",focus:"var(--color-success-focus)",content:"var(--color-success-content)"},warning:{DEFAULT:"var(--color-warning)",50:"var(--color-warning-50)",100:"var(--color-warning-100)",200:"var(--color-warning-200)",300:"var(--color-warning-300)",400:"var(--color-warning-400)",500:"var(--color-warning-500)",600:"var(--color-warning-600)",700:"var(--color-warning-700)",800:"var(--color-warning-800)",900:"var(--color-warning-900)",focus:"var(--color-warning-focus)",content:"var(--color-warning-content)"},error:{DEFAULT:"var(--color-error)",50:"var(--color-error-50)",100:"var(--color-error-100)",200:"var(--color-error-200)",300:"var(--color-error-300)",400:"var(--color-error-400)",500:"var(--color-error-500)",600:"var(--color-error-600)",700:"var(--color-error-700)",800:"var(--color-error-800)",900:"var(--color-error-900)",focus:"var(--color-error-focus)",content:"var(--color-error-content)"},danger:{DEFAULT:"var(--color-error)",50:"var(--color-error-50)",100:"var(--color-error-100)",200:"var(--color-error-200)",300:"var(--color-error-300)",400:"var(--color-error-400)",500:"var(--color-error-500)",600:"var(--color-error-600)",700:"var(--color-error-700)",800:"var(--color-error-800)",900:"var(--color-error-900)",focus:"var(--color-error-focus)",content:"var(--color-error-content)"},failure:{DEFAULT:"var(--color-error)",50:"var(--color-error-50)",100:"var(--color-error-100)",200:"var(--color-error-200)",300:"var(--color-error-300)",400:"var(--color-error-400)",500:"var(--color-error-500)",600:"var(--color-error-600)",700:"var(--color-error-700)",800:"var(--color-error-800)",900:"var(--color-error-900)",focus:"var(--color-error-focus)",content:"var(--color-error-content)"}})},
+                },
+              },
+            },
+            variants: {
+              extend: {
+                backgroundColor: ['active', 'group-hover'],
+                textColor: ['active', 'group-hover'],
+              },
+            },
+            plugins: [],
+          };
+  </script>
+`,f=`
+  <head>
+    ${n}
+    ${c}
+    ${l}
+    ${a}
+    ${i}
+    ${s}
+  </head>
+`,u=`
+<head>
+    <link href="{{cdnLink}}" rel="stylesheet">
+    ${n}
+    ${c}
+    ${l}
+    ${a}
+    ${i}
+    ${s}
+</head>
+`;var d=t(58125),h=t(23988),p=t(81037),y=t(55959),m=t(70864);let b=async()=>{try{let e=await t.e(47694).then(t.bind(t,47694));return e.fonts||e.default||[]}catch(e){return console.warn("Failed to load fonts list:",e),[]}},v=null,g=null;async function w(){return g||(v||(v=b()),g=await v)}let x=new Map,S=e=>e?e.replace(/<html[^>]*>|<\/html>/gi,"").replace(/<body[^>]*>|<\/body>/gi,"").trim():"",E=function(e,r){let[t,n]=(0,o.useState)({code:"",codeWithoutHead:"",jsxWithHead:"",l2Code:"",showJSX:"",originalHtmlCode:"",isPrototype:!1,files:[],entryFile:"",isLoading:!0,isReactProject:!1,buildUrl:"",livePreviewUrl:"",buildPreviewUrl:"",sandboxUrl:"",screenshotUrl:"",sandboxProjectId:"",gcsBasePath:"",reactRoutes:[]}),c=(0,o.useRef)();return(0,o.useEffect)(()=>{if(e)if(e.isReactProject){let r=e.sandboxURL??e.sandboxUrl??"",t=(0,y.dE)(e.screenshotUrl,e.screenshotURL),o=e.sandboxProjectId,c=e.gcsBasePath,l=(0,m.z7)(e),a=(0,m.x7)(e),i=(0,m.Xs)(e),s=e.reactRoutes,f=!1;e.isPrototype&&(f=!0),n({code:"",codeWithoutHead:"",jsxWithHead:"",l2Code:"",showJSX:"",originalHtmlCode:"",isPrototype:f,files:[],entryFile:"",isLoading:!1,isReactProject:!0,buildUrl:i,livePreviewUrl:l,buildPreviewUrl:a,sandboxUrl:r,screenshotUrl:t,sandboxProjectId:o,gcsBasePath:c,reactRoutes:s})}else if(e?.isPrototype&&e.prototypeScreens&&e.prototypeScreens.length>0){let r=e.entryFile,t=e.prototypeScreens.map(e=>({id:e.id,path:e.screenTitle,content:e.prototypeCode}));r&&(t=t.slice().sort((e,t)=>e.id===r?-1:+(t.id===r))),n({code:"",codeWithoutHead:"",jsxWithHead:"",l2Code:"",showJSX:"",originalHtmlCode:"",isPrototype:e?.isPrototype??!1,files:t,entryFile:r,isLoading:!1,isReactProject:!1,buildUrl:"",livePreviewUrl:"",buildPreviewUrl:"",sandboxUrl:"",screenshotUrl:"",sandboxProjectId:"",gcsBasePath:"",reactRoutes:[]})}else{let t=e?.wireframeOutputHtml??e?.output,o=e?.isL1,l=r?.font||e?.font,a=`${function(e){if(!e)return"";let r=e.wireframeOutputHtml??e.output??"";return[e.id||"",e.contentUpdatedAt||"",e.lastModified||"",e.updatedAt||"",e.currentBuildVersionId||"",e.retryId||"",e.isL1?"l1":"",e.suggestedFont||"",e.customCollectionName||"",e.selectedFont||"",`fp:${function(e){if("string"!=typeof e||0===e.length)return"0";let r=5381;for(let t=0;t<e.length;t++)r=(r<<5)+r+e.charCodeAt(t)|0;return`${e.length}:${r}`}(r)}`].join("|")}(e)}||font:${l||""}`;if(c.current===a)return;c.current=a;let i=function(e){if(!x.has(e))return;let r=x.get(e);return x.delete(e),x.set(e,r),r}(a);if(i)return void n(i);(async()=>{let l,i=await w()||[],s="string"!=typeof t?t:t.replace(/^\s*<screen_requirements>[\s\S]*?<\/screen_requirements>\s*(?=<!doctype\s+html(?:\s|>)|<html(?:\s|>))/i,""),h="";o&&t&&(h=S(t));let{fontToUse:y,shouldApplyFont:m}=(0,p.wd)(e,r,s),b=null;if(m&&y&&((b=(0,p.eZ)(y,i))||(m=!1)),s)if(s.includes("<html")){let e=s;m&&b&&y&&(e=(0,d.A)(e,y,b.cdnLink)),l={code:e,codeWithoutHead:S(s),jsxWithHead:s,l2Code:t,showJSX:h,originalHtmlCode:t,isPrototype:!1,files:[],entryFile:"",isLoading:!1,isReactProject:!1,buildUrl:"",livePreviewUrl:"",buildPreviewUrl:"",sandboxUrl:"",screenshotUrl:"",sandboxProjectId:"",gcsBasePath:"",reactRoutes:[]}}else{let e=f;m&&b&&y&&(e=u.replace("{{cdnLink}}",b.cdnLink).replace("{{font}}",y));let r=`
+              <html class="">
+                ${e}
+                <body class="h-full text-base-content">
+                  ${s}
+                </body>
+              </html>
+            `,o=r;m&&b&&y&&(o=(0,d.A)(r,y,b.cdnLink)),l={code:o,codeWithoutHead:s,jsxWithHead:`
+                <html class="">
+                  ${e}
+                  <body class="h-full text-base-content">
+                    ${h}
+                  </body>
+                </html>
+              `,l2Code:t,showJSX:h,originalHtmlCode:t,isPrototype:!1,files:[],entryFile:"",isLoading:!1,isReactProject:!1,buildUrl:"",livePreviewUrl:"",buildPreviewUrl:"",sandboxUrl:"",screenshotUrl:"",sandboxProjectId:"",gcsBasePath:"",reactRoutes:[]}}else{let e=t;m&&b&&y&&(e=(0,d.A)(t,y,b.cdnLink)),l={code:e,codeWithoutHead:"",jsxWithHead:"",l2Code:"",showJSX:"",originalHtmlCode:t,isPrototype:!1,files:[],entryFile:"",isLoading:!1,isReactProject:!1,buildUrl:"",livePreviewUrl:"",buildPreviewUrl:"",sandboxUrl:"",screenshotUrl:"",sandboxProjectId:"",gcsBasePath:"",reactRoutes:[]}}if(c.current===a){var v=l;if(x.has(a)&&x.delete(a),x.set(a,v),x.size>80){let e=x.keys().next().value;void 0!==e&&x.delete(e)}n(l)}})()}},[e,r]),(0,o.useMemo)(()=>({...t,previewCode:(0,h.L)(t.code)}),[t])}},55959:(e,r,t)=>{function o(e){if(!e||"string"!=typeof e)return!1;let r=e.trim().toLowerCase();return(!!r.startsWith("http://")||!!r.startsWith("https://"))&&!!(/\.(webp|png|jpe?g|gif|avif)(\?|#|$)/i.test(r)||r.includes("storage.googleapis.com")&&r.includes("screenshot"))}function n(){for(var e=arguments.length,r=Array(e),t=0;t<e;t++)r[t]=arguments[t];for(let e of r)if(o(e))return String(e).trim();return null}function c(){for(var e=arguments.length,r=Array(e),t=0;t<e;t++)r[t]=arguments[t];for(let e of r)if(o(e))return String(e).trim();return""}function l(){for(var e=arguments.length,r=Array(e),t=0;t<e;t++)r[t]=arguments[t];let o=c(...r);if(o)return o;for(let e of r){if("string"!=typeof e)continue;let r=e.trim();if(r.startsWith("/")&&/\.(webp|png|jpe?g|gif|avif)(\?|#|$)/i.test(r))return r}return""}t.d(r,{pm:()=>n,dE:()=>c,ll:()=>l})},58125:(e,r,t)=>{t.d(r,{A:()=>c});let o="data-uxp-font-override",n="/* uxp-font-override */",c=function(e,r,t){if(!e||"string"!=typeof e)return console.warn("HTML content is required and must be a string"),e;if(!r||!t)return console.warn("Font name and URL are required for font update"),e;let c=e;e.includes("<!DOCTYPE html>")||(c="<!DOCTYPE html>"+e);let l=new DOMParser().parseFromString(c,"text/html");if(!l.querySelector('script[src*="cdn.tailwindcss.com"]')){let e=l.createElement("script");e.src="https://cdn.tailwindcss.com";let r=l.head.querySelector("script");r?l.head.insertBefore(e,r):l.head.appendChild(e)}l.querySelectorAll("script").forEach(e=>{(e.hasAttribute(o)||(e.textContent||"").trimStart().startsWith(n))&&e.remove()});let a=l.createElement("script");a.setAttribute(o,""),a.textContent=`${n}
+(function (font) {
+  try {
+    if (typeof tailwind === "undefined" || !tailwind) return;
+    var config = tailwind.config;
+    if (!config || typeof config !== "object") {
+      tailwind.config = { theme: { extend: { fontFamily: { sans: [font, "sans-serif"] } } } };
+      return;
+    }
+    var theme = config.theme || {};
+    var extend = theme.extend || {};
+    var fontFamily = extend.fontFamily;
+    if (!fontFamily || !fontFamily.primary) return;
+    var nextFontFamily = {};
+    for (var key in fontFamily) nextFontFamily[key] = [font, "sans-serif"];
+    tailwind.config = Object.assign({}, config, {
+      theme: Object.assign({}, theme, {
+        extend: Object.assign({}, extend, { fontFamily: nextFontFamily })
+      })
+    });
+  } catch (error) {}
+})(${function(e){let r="";for(let t of JSON.stringify(String(e))){let e=t.charCodeAt(0);r+="<"===t||">"===t||"&"===t||8232===e||8233===e?`\\u${e.toString(16).padStart(4,"0")}`:t}return r}(r)});
+`;let i=Array.from(l.querySelectorAll("script")).find(e=>e.textContent&&e.textContent.includes("tailwind.config"));if(i)i.parentNode.insertBefore(a,i.nextSibling);else{let e=l.querySelector('script[src*="cdn.tailwindcss.com"]');e&&e.parentNode?e.parentNode.insertBefore(a,e.nextSibling):l.head.appendChild(a)}l.querySelectorAll('link[href*="fonts.googleapis.com"]').forEach(e=>{e.hasAttribute("data-manual-edit-font")||e.parentNode.removeChild(e)});let s=l.querySelector('link[href="https://fonts.googleapis.com"][rel="preconnect"]');s||((s=l.createElement("link")).rel="preconnect",s.href="https://fonts.googleapis.com",l.head.appendChild(s));let f=l.querySelector('link[href="https://fonts.gstatic.com"][crossorigin]');f||((f=l.createElement("link")).rel="preconnect",f.href="https://fonts.gstatic.com",f.setAttribute("crossorigin",""),l.head.appendChild(f));let u=l.createElement("link");u.rel="stylesheet",u.href=t,l.head.appendChild(u);let d=function(e){let r="'";for(let t of String(e))r+=/[A-Za-z0-9 _-]/.test(t)?t:`\\${t.codePointAt(0).toString(16)} `;return`${r}'`}(r),h=l.querySelectorAll("style"),p=!1;if(h.forEach(e=>{e.textContent&&e.textContent.includes("font-family")&&(e.textContent.includes("body")&&(p=!0,e.textContent=e.textContent.replace(/body\s*{\s*font-family:\s*['"]([^'"]+)['"]/g,()=>`body { font-family: ${d}`)),e.textContent.includes("*")&&(p=!0,e.textContent=e.textContent.replace(/\*\s*{\s*font-family:\s*['"]([^'"]+)['"]/g,()=>`* { font-family: ${d}`)))}),!p){let e=l.createElement("style"),r=l.querySelector('link[href*="font-awesome"]')||l.querySelector('script[src*="font-awesome"]')||l.querySelector(".fa, .fas, .far, .fal, .fab");e.textContent=`
+      body {
+        font-family: ${d}, sans-serif !important;
+      }
+      ${r?`
+      /* Preserve Font Awesome icons */
+      .fa, .fas, .far, .fal, .fab {
+        font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+      }`:""}
+    `,l.head.appendChild(e)}let y=l.createElement("style");y.textContent=`
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  `,l.head.appendChild(y);let m=l.body.classList;m.length>0&&m.forEach(e=>{e.includes("font-")&&(l.body.classList.remove(e),l.body.classList.add("font-custom"))});try{return l.documentElement.outerHTML}catch(e){return console.warn("outerHTML failed, falling back to XMLSerializer:",e),new XMLSerializer().serializeToString(l)}}},70864:(e,r,t)=>{t.d(r,{Go:()=>d,Xs:()=>f,x7:()=>s,z7:()=>i});var o=t(49680),n=t(35306);let c=new Set(["expired","gc_cleaned","failed","killed"]);function l(e){return"string"==typeof e&&e.trim()?e.trim():""}function a(e,r){r&&!e.includes(r)&&e.push(r)}function i(e){return!function(e){if(!e||"object"!=typeof e||(0,n.Fv)(e)||!(l(e.livePreviewURL)||l(e.livePreviewUrl)||l(e.sandboxPreviewURL)))return!1;let r=l(e.sandboxStatus);return!(r&&c.has(r))}(e)?"":l(e.livePreviewURL)||l(e.livePreviewUrl)||l(e.sandboxPreviewURL)||""}function s(e){if(!e||"object"!=typeof e)return"";let r=l(e.buildUrl)||l(e.buildURL)||l(e.cloudflareUrl)||l(e.cloudflareURL)||"",t=e.currentBuildVersionId||e.buildCompletedAt||e.lastBuildRequestAt||e.updatedAt||null;if(!r)return"";if(!t)return r;let o=r.includes("?")?"&":"?";return`${r}${o}uxp_build=${encodeURIComponent(String(t))}`}function f(e){return u(e)[0]||""}function u(e){let r=i(e),t=s(e),n=[];return(0,o.CF)(e)?(a(n,r),a(n,t)):(a(n,t),a(n,r)),n}function d(e){let{wireframe:r,buildUrl:t,livePreviewUrl:o="",buildPreviewUrl:n=""}=e;return o.trim()||n.trim()?u(r):t.trim()?[t.trim()]:[]}},81037:(e,r,t)=>{t.d(r,{Ay:()=>c,eZ:()=>n,wd:()=>o});let o=function(e){let r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:null,t=arguments.length>2&&void 0!==arguments[2]?arguments[2]:"",o=r?.font||e?.font||e?.selectedFont;return o?{fontToUse:o,shouldApplyFont:!0,priority:1,reason:"user-selected"}:t&&"string"==typeof t&&(t.includes("<head")||t.includes("<HEAD"))?{fontToUse:null,shouldApplyFont:!1,priority:2,reason:"full-html-preserve"}:e?.customCollectionName&&e?.suggestedFont?{fontToUse:e.suggestedFont,shouldApplyFont:!0,priority:3,reason:"suggested-font"}:{fontToUse:null,shouldApplyFont:!1,priority:4,reason:"no-default"}},n=function(e){let r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:[];return e&&Array.isArray(r)&&r.find(r=>r.family===e)||null},c=o},87169:(e,r,t)=>{t.d(r,{nH:()=>h,oZ:()=>u,xK:()=>d});class o extends Error{constructor(){super("LABS_ASSET_RESOLUTION_FAILED"),this.name="LabsAssetResolutionError"}}let n=/^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/,c=/uxp-asset:\/\/([A-Za-z0-9][A-Za-z0-9_-]{0,127})/g,l=/uxp-asset:/gi,a=/&(?:#(?:x[0-9a-f]+|[0-9]+);?|[a-z][a-z0-9]*(?:;|(?=[^a-z0-9=-]|$)))/i;function i(e,r){let t=r.index,o=e.slice(0,t),n=e.slice(t+r[0].length),c=o.slice(-1);return['"',"'","`"].includes(c)?n.startsWith(c):/\burl\(\s*$/i.test(o)?/^\s*\)/.test(n):/\b[\w:-]+=\s*$/.test(o)?/^(?:\s|\/?>)/.test(n):0===t&&0===n.length}function s(e){if(e?.aborted)throw new DOMException("Asset rendering cancelled","AbortError")}function f(e){let r;if("string"!=typeof e||!/^[A-Za-z0-9:/?#[\]@!%&*+,\-._~;=]+$/.test(e)||a.test(e))throw new o;try{r=new URL(e)}catch{throw new o}if("https:"!==r.protocol||r.username||r.password)throw new o}async function u(e,r){let t=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};if(s(t.signal),"string"!=typeof e)throw new o;let a=Array.from(e.matchAll(c)),u=Array.from(e.matchAll(l),e=>e.index);if(a.length!==u.length||a.some((r,t)=>r.index!==u[t]||!i(e,r)))throw new o;let d=Array.from(new Set(a.map(e=>e[1])));if(d.some(e=>!n.test(e)))throw new o;if(!d.length)return{html:e,refreshAt:null,expiresAt:null,bindings:[]};let h=await r(d,t.signal);s(t.signal);let p=t.now??Date.now();if(!Array.isArray(h)||h.length!==d.length)throw new o;let y=new Map,m=new Map,b=1/0,v=1/0;for(let e of h){if(!e||!d.includes(e.assetId)||y.has(e.assetId)||!Number.isFinite(e.expiresAt)||e.expiresAt<=p+6e4||(f(e.url),m.has(e.url)))throw new o;y.set(e.assetId,e.url),m.set(e.url,e.assetId),b=Math.min(b,e.expiresAt-6e4),v=Math.min(v,e.expiresAt)}return{html:e.replace(c,e=>y.get(e.slice(12))),refreshAt:b,expiresAt:v,bindings:d.map(e=>({assetId:e,url:y.get(e)}))}}function d(e,r){if("string"!=typeof e)throw new o;let t=new Set,c=[...r].sort((e,r)=>r.url.length-e.url.length),l=e;for(let e of c){if(!n.test(e.assetId)||t.has(e.url))throw new o;f(e.url),t.add(e.url);let r=`uxp-asset://${e.assetId}`;l=(l=l.split(e.url.replaceAll("&","&amp;")).join(r)).split(e.url).join(r)}return l}function h(e,r){if("string"!=typeof e)throw new o;let t=Array.from(e.matchAll(c)),a=Array.from(e.matchAll(l),e=>e.index);if(t.length!==a.length||t.some((r,t)=>r.index!==a[t]||!i(e,r)))throw new o;let s=Array.from(new Set(t.map(e=>e[1]))),u=new Map,d=new Set;for(let e of r)if(!(e&&n.test(e.assetId))||s.includes(e.assetId)){if(!n.test(e.assetId)||!s.includes(e.assetId)||u.has(e.assetId)||d.has(e.url))throw new o;f(e.url),u.set(e.assetId,e.url),d.add(e.url)}if(u.size!==s.length)throw new o;return e.replace(c,e=>u.get(e.slice(12)))}},90868:(e,r,t)=>{t.d(r,{$L:()=>a,G1:()=>h,Lb:()=>d,RQ:()=>f,TQ:()=>p,mT:()=>i});let o=`(function() {
+  function _uxpResizeCharts() {
+    if (window.Plotly) {
+      document.querySelectorAll('.plot-container.plotly').forEach(function(pc) {
+        var gd = pc.parentElement;
+        if (!gd) return;
+        var rect = gd.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return;
+        try { window.Plotly.relayout(gd, { width: Math.round(rect.width), height: Math.round(rect.height) }); } catch(e) {}
+      });
+    }
+    if (window.ApexCharts && window.Apex && window.Apex._chartInstances) {
+      window.Apex._chartInstances.forEach(function(inst) {
+        try { (inst.chart || inst).updateOptions({}, false, false); } catch(e) {}
+      });
+    }
+    if (window.Chart) {
+      try { Object.values(window.Chart.instances || {}).forEach(function(c) { c.resize(); }); } catch(e) {}
+    }
+  }
+
+  window.addEventListener('load', function() {
+    setTimeout(function() { _uxpResizeCharts(); setTimeout(_uxpResizeCharts, 500); }, 300);
+    try {
+      var _lastW = 0, _lastH = 0, _timer = 0;
+      new ResizeObserver(function() {
+        var w = document.documentElement.clientWidth;
+        var h = document.documentElement.clientHeight;
+        if (w === _lastW && h === _lastH) return;
+        _lastW = w; _lastH = h;
+        clearTimeout(_timer);
+        _timer = setTimeout(_uxpResizeCharts, 150);
+      }).observe(document.documentElement);
+    } catch(e) {}
+  });
+})();`,n=`<script>${o}</script>`,c=o.replace(`var _lastW = 0, _lastH = 0, _timer = 0;
+      new ResizeObserver(function() {
+        var w = document.documentElement.clientWidth;
+        var h = document.documentElement.clientHeight;`,`var _lastW = window.innerWidth, _lastH = window.innerHeight, _timer = 0;
+      window.addEventListener('resize', function() {
+        var w = window.innerWidth;
+        var h = window.innerHeight;`).replace("}).observe(document.documentElement);","});"),l=`
+  <script>
+    (function() {
+      function blockEvent(e) {
+        if (!e) return false;
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+        if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+        return false;
+      }
+
+      // Block all anchor navigations (including http(s), mailto, tel, hash, fragments)
+      document.addEventListener('click', function(e) {
+        var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+        if (!a) return;
+        return blockEvent(e);
+      }, true);
+
+      // Neutralize programmatic navigation attempts
+      try { window.open = function() { return null }; } catch (_) {}
+      try {
+        var noop = function(){};
+        history.pushState = noop;
+        history.replaceState = noop;
+      } catch (_) {}
+      try {
+        if (window.location) {
+          window.location.assign = function(){};
+          window.location.replace = function(){};
+        }
+      } catch (_) {}
+    })();
+  </script>
+`,a=l+n,i=l+`<script>${c}</script>`,s=`(function() {
+  var H = 920;
+  var FULL_SCREEN_DIM_PROPS = { height: 1, 'min-height': 1, 'max-height': 1 };
+  var HERO_TOKEN_RE = /^hero(?:$|[-_].*|[A-Z].*)$/;
+
+  function isPureFullViewportHeight(val) {
+    return /^\\s*100(\\.0+)?(vh|dvh|svh|lvh)\\s*(?:!important)?\\s*$/i.test(val || '');
+  }
+
+  function hasHeroToken(raw) {
+    if (!raw) return false;
+    var tokens = String(raw).split(/\\s+/);
+    for (var i = 0; i < tokens.length; i++) {
+      if (HERO_TOKEN_RE.test(tokens[i])) return true;
+    }
+    return false;
+  }
+
+  function isHeroSelector(selectorText) {
+    if (!selectorText) return false;
+    return /(^|[\\s>+~,(])#hero(?=$|[-_]|[A-Z]|[^-_a-zA-Z0-9])/.test(selectorText) ||
+      /(^|[\\s>+~,(])\\.hero(?=$|[-_]|[A-Z]|[^-_a-zA-Z0-9])/.test(selectorText);
+  }
+
+  function isHeroElement(el) {
+    if (!el || !el.getAttribute) return false;
+    return hasHeroToken(el.getAttribute('id')) || hasHeroToken(el.getAttribute('class'));
+  }
+
+  function shouldSkipScreenUtility(prop, val, selectorText, forceReplace) {
+    var p = (prop || '').toLowerCase().trim();
+    if (!FULL_SCREEN_DIM_PROPS[p] || !isPureFullViewportHeight(val)) return false;
+    // Streaming preview sets this flag: its iframe is sized to content height,
+    // so "live" 100vh elements would grow the content, which grows the iframe,
+    // which grows the elements again — a runaway height feedback loop.
+    if (forceReplace || window.__uxpForceScreenVhToPx) return false;
+    if (isHeroSelector(selectorText)) return false;
+    return true;
+  }
+
+  function vhToPx(s) {
+    return s.replace(/([0-9.]+)(dvh|svh|lvh|vh)/g, function(_, n) {
+      return (parseFloat(n) * H / 100) + 'px';
+    });
+  }
+
+  function syncVhCustomProp() {
+    try {
+      var h = window.__uxpForceScreenVhToPx
+        ? H
+        : (window.innerHeight || document.documentElement.clientHeight || H);
+      document.documentElement.style.setProperty('--vh', (h / 100) + 'px');
+    } catch (e) {}
+  }
+
+  // Patch CSS values (not selectors) recursively through @layer/@media/@supports
+  function patchRules(rules) {
+    try {
+      for (var i = 0; i < rules.length; i++) {
+        var rule = rules[i];
+        if (rule.cssRules) patchRules(rule.cssRules);
+        if (!rule.style) continue;
+        for (var j = 0; j < rule.style.length; j++) {
+          var prop = rule.style[j];
+          var val = rule.style.getPropertyValue(prop);
+          if (val.indexOf('vh') === -1) continue;
+          if (shouldSkipScreenUtility(prop, val, rule.selectorText, false)) continue;
+          rule.style.setProperty(prop, vhToPx(val), rule.style.getPropertyPriority(prop));
+        }
+      }
+    } catch(e) {}
+  }
+  function patchSheet(sheet) {
+    try { patchRules(sheet.cssRules || []); } catch(e) {}
+  }
+
+  /** Vite/React prod builds use <link rel="stylesheet" href="assets/*.css"> — not <style>. */
+  function patchStylesheetsFromDocument() {
+    try {
+      var list = document.styleSheets;
+      for (var i = 0; i < list.length; i++) {
+        try {
+          var sheet = list[i];
+          if (sheet && sheet.cssRules) patchSheet(sheet);
+        } catch (e) {}
+      }
+    } catch (e) {}
+    try {
+      document.querySelectorAll('link[rel="stylesheet"]').forEach(function(link) {
+        function go() {
+          try {
+            if (link.sheet) patchSheet(link.sheet);
+          } catch (e) {}
+        }
+        if (link.sheet) go();
+        else link.addEventListener('load', go);
+      });
+    } catch (e) {}
+  }
+
+  try {
+    var _ins = CSSStyleSheet.prototype.insertRule;
+    CSSStyleSheet.prototype.insertRule = function(rule, index) {
+      var idx = _ins.call(this, rule, index);
+      try { if (this.cssRules && this.cssRules[idx]) patchRules([this.cssRules[idx]]); } catch(e) {}
+      return idx;
+    };
+  } catch(e) {}
+
+  try {
+    var _rs = CSSStyleSheet.prototype.replaceSync;
+    if (_rs) {
+      CSSStyleSheet.prototype.replaceSync = function(text) {
+        _rs.call(this, text);
+        patchSheet(this);
+      };
+    }
+  } catch(e) {}
+
+  try {
+    var _r = CSSStyleSheet.prototype.replace;
+    if (_r) {
+      CSSStyleSheet.prototype.replace = function(text) {
+        var self = this;
+        return _r.call(this, text).then(function(sheet) { patchSheet(sheet || self); return sheet || self; });
+      };
+    }
+  } catch(e) {}
+
+  // ─── DOM-LEVEL FALLBACK (Tailwind v3 / plain <style> textContent updates) ─
+  function fixInlineVh(el) {
+    var s = el.getAttribute && el.getAttribute('style');
+    if (!s || s.indexOf('vh') === -1) return;
+    var forceReplace = isHeroElement(el);
+    var parts = s.split(';');
+    var out = [];
+    for (var i = 0; i < parts.length; i++) {
+      var seg = parts[i];
+      if (!seg.trim()) continue;
+      var colon = seg.indexOf(':');
+      if (colon === -1) {
+        out.push(seg.trim());
+        continue;
+      }
+      var prop = seg.slice(0, colon).trim();
+      var val = seg.slice(colon + 1);
+      if (shouldSkipScreenUtility(prop, val, '', forceReplace)) out.push(prop + ':' + val);
+      else out.push(prop + ':' + vhToPx(val));
+    }
+    el.setAttribute('style', out.join('; '));
+  }
+
+  function watchStyleEl(el) {
+    if (!el || el.getAttribute('data-vh-fix') || el._vhWatched) return;
+    el._vhWatched = true;
+    if (el.sheet) patchSheet(el.sheet);
+    try {
+      new MutationObserver(function() { if (el.sheet) patchSheet(el.sheet); })
+        .observe(el, { childList: true, subtree: true, characterData: true });
+    } catch(e) {}
+  }
+
+  function applyFixes() {
+    syncVhCustomProp();
+    try {
+      new ResizeObserver(function() { syncVhCustomProp(); }).observe(document.documentElement);
+    } catch (e) {}
+    patchStylesheetsFromDocument();
+    document.querySelectorAll('[style]').forEach(fixInlineVh);
+    document.querySelectorAll('style').forEach(watchStyleEl);
+    try { (document.adoptedStyleSheets || []).forEach(patchSheet); } catch(e) {}
+    try {
+      new MutationObserver(function(muts) {
+        muts.forEach(function(m) {
+          m.addedNodes.forEach(function(node) {
+            if (node.nodeType !== 1) return;
+            if (node.tagName === 'STYLE') watchStyleEl(node);
+            if (node.tagName === 'LINK' && node.rel === 'stylesheet') {
+              var link = node;
+              var go = function() {
+                try { if (link.sheet) patchSheet(link.sheet); } catch(e) {}
+              };
+              if (link.sheet) go();
+              else link.addEventListener('load', go);
+            }
+            fixInlineVh(node);
+            if (node.querySelectorAll) node.querySelectorAll('[style]').forEach(fixInlineVh);
+          });
+        });
+      }).observe(document.documentElement, { childList: true, subtree: true });
+    } catch(e) {}
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyFixes);
+  else applyFixes();
+
+  window.addEventListener('load', function() {
+    syncVhCustomProp();
+    patchStylesheetsFromDocument();
+    document.querySelectorAll('style').forEach(watchStyleEl);
+    document.querySelectorAll('[style]').forEach(fixInlineVh);
+    try { (document.adoptedStyleSheets || []).forEach(patchSheet); } catch(e) {}
+  });
+})();`,f=`<script>${s}</script>`+n,u="uxpilot:install-vh-fix";function d(e){if(!e?.contentWindow)return;let r=`${s}
+${o}`,t=e.contentWindow,n=()=>{try{t.postMessage({type:u,payload:r},"*")}catch{}};if(function(e){if(!e?.contentWindow)return!1;let r=e.contentWindow,t=`${s}
+${o}`;try{let o=e.contentDocument;if(o?.documentElement){if(function(e){if(!e)return!1;try{return!!e.querySelector('script[data-uxp="canvas-vh-fix"]')}catch{return!1}}(o)||r.__uxpVhFixInjected)return!0;let e=o.createElement("script");e.setAttribute("data-uxp","vh-fix"),e.textContent=t;let n=o.head||o.getElementsByTagName("head")[0]||o.documentElement;return n.insertBefore(e,n.firstChild),r.__uxpVhFixInjected=!0,!0}}catch{}try{r.postMessage({type:u,payload:t},"*")}catch{}return!1}(e))return;let c=!0;try{c=!e.contentDocument}catch{c=!0}c&&[150,450,1200].forEach(e=>setTimeout(n,e))}let h=`
+  <script>
+    (function() {
+      // Block <a href="…"> navigation unconditionally.
+      // ONLY e.preventDefault() — onclick handlers on anchors still fire so all
+      // JavaScript UI bindings (tabs, dropdowns, modals) work as expected.
+      document.addEventListener('click', function(e) {
+        var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+        if (!a) return;
+        e.preventDefault();
+      }, true);
+
+      // Block window.open
+      try { window.open = function() { return null; }; } catch (_) {}
+
+      // Block history navigation APIs
+      try {
+        history.pushState = function() {};
+        history.replaceState = function() {};
+      } catch (_) {}
+
+      // Block location.assign and location.replace
+      try {
+        if (window.location) {
+          window.location.assign = function() {};
+          window.location.replace = function() {};
+        }
+      } catch (_) {}
+
+      // Block window.location.href = '…' and location.href = '…' direct assignments.
+      // Override the href setter on Location.prototype (iframe-local, does not affect parent).
+      try {
+        var _locProto = Location.prototype;
+        var _hrefDesc = Object.getOwnPropertyDescriptor(_locProto, 'href');
+        if (_hrefDesc && typeof _hrefDesc.set === 'function') {
+          Object.defineProperty(_locProto, 'href', {
+            get: _hrefDesc.get,
+            set: function() { /* navigation blocked — onclick already ran */ },
+            configurable: true,
+            enumerable: true,
+          });
+        }
+      } catch (_) {}
+    })();
+  </script>
+`,p=`
+  <script>
+    (function() {
+      function isExternal(href) {
+        return /^https?:\\/\\//i.test(href) || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#');
+      }
+      function toPath(href) {
+        try {
+          var u = new URL(href, location.href);
+          return (u.pathname || '').replace(/^\\//, '') || 'index.html';
+        } catch (e) {
+          return href;
+        }
+      }
+      
+      document.addEventListener('click', function(e) {
+        var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+        if (!a) return;
+        var href = a.getAttribute('href') || '';
+        if (!href) return;
+        if (href.indexOf('#') !== -1) { e.preventDefault(); return; }
+        if (isExternal(href)) return;
+        
+        e.preventDefault();
+        parent.postMessage({ type: 'uxp:navigate', path: toPath(href), nonce: window.__uxpPreviewNonce }, window.__uxpParentOrigin || '*');
+      }, true);
+      function postHeight() {
+        try {
+          parent.postMessage({ type: 'uxp:height', height: document.documentElement.scrollHeight, nonce: window.__uxpPreviewNonce }, window.__uxpParentOrigin || '*');
+        } catch (e) {
+        }
+      }
+      
+      window.addEventListener('load', postHeight);
+      try {
+        new ResizeObserver(postHeight).observe(document.documentElement);
+      } catch (e) {
+      }
+    })();
+  </script>
+`}}]);

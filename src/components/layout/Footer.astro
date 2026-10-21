@@ -1,0 +1,37 @@
+---
+/**
+ * 页脚（设计稿还原）：深色 slate-900 底、社交图标、名言与版权
+ */
+import Icon from '../ui/Icon.astro';
+import { site, socials } from '../../data/site';
+---
+
+<footer id="footer" class="bg-slate-900 text-gray-400 py-12">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+      <div class="flex items-center space-x-2 mb-6 md:mb-0">
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">
+          <Icon name="mountain" class="w-4 h-4" />
+        </div>
+        <div>
+          <h2 class="text-white font-bold">{site.name}</h2>
+          <p class="text-[10px]">{site.tagline}</p>
+        </div>
+      </div>
+      <div class="flex flex-col items-center md:items-end">
+        <div class="flex space-x-6 mb-4">
+          {socials.map((s) => (
+            <a href={s.href} class="hover:text-white transition" title={s.name}>
+              <Icon name={s.icon} class="w-5 h-5" />
+            </a>
+          ))}
+        </div>
+        <p class="text-sm">{site.copyright}</p>
+      </div>
+    </div>
+    <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <p class="text-xs italic text-gray-500">"{site.quote}"</p>
+      <p class="text-xs text-gray-500">{site.buildNote}</p>
+    </div>
+  </div>
+</footer>

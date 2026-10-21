@@ -1,0 +1,8 @@
+---
+import CollectionPage from '../../components/layout/CollectionPage.astro';
+import { getAllContent } from '../../utils/content';
+
+const items = (await getAllContent()).filter((i) => i.type === 'video');
+---
+
+<CollectionPage title="影像视频" items={items} />

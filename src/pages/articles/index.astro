@@ -1,0 +1,8 @@
+---
+import CollectionPage from '../../components/layout/CollectionPage.astro';
+import { getAllContent } from '../../utils/content';
+
+const items = (await getAllContent()).filter((i) => i.type === 'article');
+---
+
+<CollectionPage title="文章专栏" items={items} />

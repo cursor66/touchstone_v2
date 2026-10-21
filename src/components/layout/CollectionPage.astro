@@ -1,0 +1,39 @@
+---
+/**
+ * 内容列表页模板：articles / videos / resources 三个列表页共用。
+ * 禁止为单一类型复制此结构新建页面级组件。
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContentCard from '../cards/ContentCard.astro';
+import SectionHeading from './SectionHeading.astro';
+import type { ContentItem } from '../../utils/content';
+
+interface Props {
+  title: string;
+  items: ContentItem[];
+}
+
+const { title, items } = Astro.props;
+---
+
+<BaseLayout title={title}>
+  <main class="max-w-7xl mx-auto px-4 py-12">
+    <div class="max-w-5xl mx-auto">
+      <SectionHeading title={title} />
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {items.map(({ entry, href, type }) => (
+          <ContentCard
+            title={entry.data.title}
+            href={href}
+            cover={entry.data.cover}
+            type={type}
+            author={entry.data.author}
+            avatar={entry.data.avatar}
+            likes={entry.data.likes}
+            comments={entry.data.comments}
+          />
+        ))}
+      </div>
+    </div>
+  </main>
+</BaseLayout>

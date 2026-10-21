@@ -1,0 +1,56 @@
+---
+/**
+ * 版本档案页：展示网站历次发布版本。
+ * 当前为原型静态数据；正式环境应由 CI 或只读 API 从 PostgreSQL
+ * deployments 表读取真实发布记录（见 db/migrations/001_init.sql）。
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeading from '../components/layout/SectionHeading.astro';
+
+const releases = [
+  {
+    version: 'v1.2.0',
+    date: '2026-10-19',
+    title: '资源分享页上线',
+    notes: '新增资源详情页与分类导航',
+    commit: 'f72c6a1',
+  },
+  {
+    version: 'v1.1.0',
+    date: '2026-10-12',
+    title: '首页布局调整',
+    notes: '优化九宫格混排和内容卡片',
+    commit: 'd48b1e7',
+  },
+  {
+    version: 'v1.0.0',
+    date: '2026-10-01',
+    title: '网站首次发布',
+    notes: '文章、视频、资源基础功能',
+    commit: 'a13f9c2',
+  },
+];
+---
+
+<BaseLayout title="版本档案" description="网站的演进记录">
+  <main class="max-w-7xl mx-auto px-4 py-12">
+    <div class="max-w-5xl mx-auto">
+      <SectionHeading title="版本档案" />
+      <p class="text-sm text-gray-500 -mt-4 mb-8">网站的演进记录（当前为原型数据，正式数据来自发布数据库）。</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {releases.map((r) => (
+          <div class="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
+            <div class="flex items-baseline justify-between mb-3">
+              <span class="text-xl font-bold text-blue-600">{r.version}</span>
+              <span class="text-xs text-gray-400">{r.date}</span>
+            </div>
+            <h3 class="font-bold text-gray-900 mb-2">{r.title}</h3>
+            <p class="text-sm text-gray-500 leading-relaxed mb-6">{r.notes}</p>
+            <p class="text-xs text-gray-400 mt-auto">Commit: {r.commit}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </main>
+</BaseLayout>
