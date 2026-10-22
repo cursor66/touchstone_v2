@@ -12,9 +12,17 @@ import ContentCard from '../components/cards/ContentCard.astro';
 import SeriesCard from '../components/cards/SeriesCard.astro';
 import SectionHeading from '../components/layout/SectionHeading.astro';
 import { series } from '../data/series';
+import { getAllContent } from '../utils/content';
 
 if (!import.meta.env.DEV) {
   return Astro.redirect('/');
+}
+
+// 系列文章数与首页一致：按 frontmatter 的 series 标签实时统计
+const seriesCounts: Record<string, number> = {};
+for (const { entry } of await getAllContent()) {
+  const s = entry.data.series;
+  if (s) seriesCounts[s] = (seriesCounts[s] ?? 0) + 1;
 }
 
 const colors = [
@@ -141,7 +149,7 @@ const radii = [
         <SectionHeading title="系列专题 SeriesCard" />
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           {series.map((s) => (
-            <SeriesCard title={s.title} description={s.description} count={s.count} icon={s.icon} color={s.color} href={s.href} />
+            <SeriesCard title={s.title} description={s.description} count={seriesCounts[s.id] ?? 0} icon={s.icon} color={s.color} href={s.href} />
           ))}
         </div>
       </section>

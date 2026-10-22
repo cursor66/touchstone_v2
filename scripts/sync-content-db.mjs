@@ -11,7 +11,7 @@ const CONTENT_DIR = path.join(ROOT, 'content');
 
 /** 简单 YAML Frontmatter 解析（与 validate-content.mjs 保持一致） */
 function parseFrontmatter(file) {
-  const text = fs.readFileSync(file, 'utf8');
+  const text = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
   const match = text.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return null;
   const data = {};
