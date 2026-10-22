@@ -1,6 +1,7 @@
 ---
 title: "深度学习与人工智能：技术驱动下的未来生活图景"
 type: "article"
+series: "ai"
 date: 2026-09-28
 summary: "技术如何塑造未来生活。"
 cover: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=abstract%20neural%20network%20visualization%20glowing%20blue%20nodes%2C%20futuristic%20technology%20art&image_size=landscape_16_9"

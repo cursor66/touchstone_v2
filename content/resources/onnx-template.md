@@ -1,6 +1,7 @@
 ---
 title: "YOLO26 ONNX 推理实践模板"
 type: "resource"
+series: "project"
 date: 2026-10-17
 summary: "从模型导出到 ONNX Runtime 部署。"
 cover: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=computer%20vision%20object%20detection%20bounding%20boxes%20on%20street%20photo%2C%20technical%20illustration%2C%20dark%20blue%20theme&image_size=landscape_16_9"

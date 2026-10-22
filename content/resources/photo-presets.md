@@ -1,6 +1,7 @@
 ---
 title: "胶片感摄影后期预设包"
 type: "resource"
+series: "project"
 date: 2026-10-06
 summary: "让照片拥有胶片质感。"
 cover: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=camera%20and%20color%20grading%20screen%20in%20dark%20room%2C%20film%20tones%2C%20moody%20photography%20workspace&image_size=landscape_16_9"

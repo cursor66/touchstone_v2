@@ -15,6 +15,13 @@ import { series } from '../data/series';
 import { getAllContent } from '../utils/content';
 
 const items = await getAllContent();
+
+// 系列文章数按 frontmatter 中的 series 标签实时统计
+const seriesCounts: Record<string, number> = {};
+for (const { entry } of items) {
+  const s = entry.data.series;
+  if (s) seriesCounts[s] = (seriesCounts[s] ?? 0) + 1;
+}
 ---
 
 <BaseLayout>
@@ -66,7 +73,7 @@ const items = await getAllContent();
             <SeriesCard
               title={s.title}
               description={s.description}
-              count={s.count}
+              count={seriesCounts[s.id] ?? 0}
               icon={s.icon}
               color={s.color}
               href={s.href}

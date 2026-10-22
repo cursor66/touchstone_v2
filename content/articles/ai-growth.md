@@ -1,6 +1,7 @@
 ---
 title: "AI时代，个人成长的新机会与核心竞争力"
 type: "article"
+series: "ai"
 date: 2026-10-18
 summary: "探讨 AI 如何重塑个人成长路径。"
 cover: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=person%20using%20laptop%20with%20glowing%20AI%20assistant%20interface%2C%20modern%20workspace%2C%20warm%20light%2C%20photorealistic&image_size=landscape_16_9"

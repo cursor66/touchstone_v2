@@ -19,6 +19,8 @@ const baseSchema = z.object({
   videoUrl: z.string().optional(),
   downloadUrl: z.string().optional(),
   githubUrl: z.string().optional(),
+  /** 所属精选系列：ai（AI 赋能计划）/ kids（童趣智育）/ project（项目成果） */
+  series: z.enum(['ai', 'kids', 'project']).optional(),
 });
 
 const articles = defineCollection({

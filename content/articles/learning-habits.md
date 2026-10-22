@@ -1,6 +1,7 @@
 ---
 title: "高效学习的5个小习惯：如何更好地管理你的精力和时间"
 type: "article"
+series: "kids"
 date: 2026-10-15
 summary: "精力管理比时间管理更重要。"
 cover: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=minimal%20desk%20with%20notebook%20coffee%20and%20morning%20sunlight%2C%20study%20scene%2C%20soft%20focus%20photography&image_size=landscape_16_9"
