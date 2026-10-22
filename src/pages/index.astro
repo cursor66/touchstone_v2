@@ -1,7 +1,7 @@
 ---
 /**
- * 首页：Hero 轮播 + 内容工具栏 + 三类内容混排九宫格 + 精选系列专题
- * 布局与样式 1:1 还原设计稿，数据来自 content/ 内容集合。
+ * 首页：Hero 轮播 + 内容工具栏（类型筛选 / 排序 / 搜索）+ 内容网格 + 精选系列专题
+ * 工具栏为真实可用的客户端交互，数据来自 content/ 内容集合。
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HeroCarousel from '../components/home/HeroCarousel.astro';
@@ -10,12 +10,11 @@ import SeriesCard from '../components/cards/SeriesCard.astro';
 import SectionHeading from '../components/layout/SectionHeading.astro';
 import Button from '../components/ui/Button.astro';
 import Select from '../components/ui/Select.astro';
-import Icon from '../components/ui/Icon.astro';
 import { heroSlides } from '../data/hero';
 import { series } from '../data/series';
 import { getAllContent } from '../utils/content';
 
-const items = (await getAllContent()).slice(0, 9);
+const items = await getAllContent();
 ---
 
 <BaseLayout>
@@ -26,33 +25,37 @@ const items = (await getAllContent()).slice(0, 9);
       <!-- 内容工具栏 -->
       <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
         <div class="flex items-center space-x-4">
-          <Select options={['全部内容', '文章专栏', '影像视频', '学习资源']} />
+          <Select id="content-filter" options={['全部内容', '文章专栏', '影像视频', '学习资源']} />
           <div class="h-4 w-px bg-gray-200 hidden md:block"></div>
           <div class="flex space-x-2">
-            <Button variant="primary">最新发布</Button>
-            <Button variant="secondary">最热排行</Button>
+            <Button variant="primary" data-sort-btn="new">最新发布</Button>
+            <Button variant="secondary" data-sort-btn="hot">最热排行</Button>
           </div>
-        </div>
-        <div class="flex items-center space-x-3 text-gray-400">
-          <button class="hover:text-blue-600 transition" title="网格视图"><Icon name="grid" class="w-4 h-4" /></button>
-          <button class="hover:text-blue-600 transition" title="更多"><Icon name="ellipsis" class="w-4 h-4" /></button>
         </div>
       </div>
 
-      <!-- 内容九宫格（文章 / 视频 / 资源混排） -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- 内容网格（文章 / 视频 / 资源混排，支持筛选与排序） -->
+      <div id="content-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map(({ entry, href, type }) => (
-          <ContentCard
-            title={entry.data.title}
-            href={href}
-            cover={entry.data.cover}
-            type={type}
-            author={entry.data.author}
-            avatar={entry.data.avatar}
-            likes={entry.data.likes}
-            comments={entry.data.comments}
-          />
+          <div
+            data-card
+            data-type={type}
+            data-date={entry.data.date.getTime()}
+            data-likes={entry.data.likes}
+            data-title={entry.data.title.toLowerCase()}
+          >
+            <ContentCard
+              title={entry.data.title}
+              href={href}
+              cover={entry.data.cover}
+              type={type}
+            />
+          </div>
         ))}
+      </div>
+
+      <div id="content-empty" class="hidden bg-white rounded-2xl p-8 border border-gray-200 text-center">
+        <p class="text-sm text-gray-500">没有匹配的内容，换个关键词或分类试试。</p>
       </div>
 
       <!-- 精选系列专题 -->
@@ -74,3 +77,79 @@ const items = (await getAllContent()).slice(0, 9);
     </div>
   </main>
 </BaseLayout>
+
+<script is:inline>
+  (function () {
+    const grid = document.getElementById('content-grid');
+    if (!grid) return;
+
+    const cards = Array.from(grid.querySelectorAll('[data-card]'));
+    const empty = document.getElementById('content-empty');
+    const filter = document.getElementById('content-filter');
+    const sortBtns = document.querySelectorAll('[data-sort-btn]');
+    const typeMap = ['all', 'article', 'video', 'resource'];
+
+    let sortBy = 'new';
+    let query = '';
+
+    // Header 搜索框：输入即筛选（首页），回车跳转到首页带关键词
+    const search = document.querySelector('[data-search-input]');
+    const params = new URLSearchParams(location.search);
+    if (params.get('q')) {
+      query = params.get('q').toLowerCase();
+      if (search) search.value = params.get('q');
+    }
+
+    function apply() {
+      const type = typeMap[Number(filter.value)] || 'all';
+
+      const visible = [];
+      cards.forEach((el) => {
+        const okType = type === 'all' || el.dataset.type === type;
+        const okQuery = !query || el.dataset.title.includes(query);
+        const show = okType && okQuery;
+        el.classList.toggle('hidden', !show);
+        if (show) visible.push(el);
+      });
+
+      visible.sort((a, b) =>
+        sortBy === 'hot'
+          ? Number(b.dataset.likes) - Number(a.dataset.likes)
+          : Number(b.dataset.date) - Number(a.dataset.date),
+      );
+      visible.forEach((el) => grid.appendChild(el));
+
+      empty.classList.toggle('hidden', visible.length > 0);
+      grid.classList.toggle('hidden', visible.length === 0);
+    }
+
+    filter.addEventListener('change', apply);
+
+    sortBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        sortBy = btn.dataset.sortBtn;
+        // 切换 primary / secondary 样式
+        sortBtns.forEach((b) => {
+          const active = b === btn;
+          b.classList.toggle('bg-blue-600', active);
+          b.classList.toggle('text-white', active);
+          b.classList.toggle('bg-white', !active);
+          b.classList.toggle('text-gray-600', !active);
+          b.classList.toggle('border', !active);
+          b.classList.toggle('border-gray-200', !active);
+          b.classList.toggle('hover:bg-gray-50', !active);
+        });
+        apply();
+      });
+    });
+
+    if (search) {
+      search.addEventListener('input', () => {
+        query = search.value.trim().toLowerCase();
+        apply();
+      });
+    }
+
+    apply();
+  })();
+</script>

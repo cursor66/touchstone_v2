@@ -14,7 +14,6 @@ const baseSchema = z.object({
   tags: z.array(z.string()).default([]),
   status: z.enum(['draft', 'published', 'archived']).default('draft'),
   author: z.string().default('卡卡'),
-  avatar: z.string().optional(),
   likes: z.number().default(0),
   comments: z.number().default(0),
   videoUrl: z.string().optional(),

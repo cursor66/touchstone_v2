@@ -1,6 +1,7 @@
 ---
 /**
- * 页头（设计稿还原）：sticky 白色导航 + Logo + 搜索框 + 主题按钮
+ * 页头（设计稿还原）：sticky 白色导航 + Logo + 搜索框
+ * 搜索框：首页实时筛选内容网格；其他页面回车跳转到首页并按关键词过滤。
  */
 import Icon from '../ui/Icon.astro';
 import SearchInput from '../ui/SearchInput.astro';
@@ -22,9 +23,20 @@ import { site } from '../../data/site';
     </div>
     <div class="flex items-center space-x-4">
       <SearchInput class="w-64 hidden md:block" />
-      <button class="p-2 text-gray-500 hover:text-blue-600 transition" title="切换主题">
-        <Icon name="sun" class="w-5 h-5" />
-      </button>
     </div>
   </div>
 </header>
+
+<script is:inline>
+  (function () {
+    const search = document.querySelector('[data-search-input]');
+    if (!search) return;
+    search.addEventListener('keydown', (e) => {
+      // 非首页时回车跳转到首页搜索（首页由页面脚本直接实时筛选）
+      if (e.key === 'Enter' && !document.getElementById('content-grid')) {
+        const q = search.value.trim();
+        location.href = q ? '/?q=' + encodeURIComponent(q) : '/';
+      }
+    });
+  })();
+</script>

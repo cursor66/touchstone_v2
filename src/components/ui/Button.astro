@@ -10,9 +10,10 @@ interface Props {
   type?: 'button' | 'submit';
   class?: string;
   title?: string;
+  [key: `data-${string}`]: string;
 }
 
-const { variant = 'primary', href, type = 'button', class: className = '', title } = Astro.props;
+const { variant = 'primary', href, type = 'button', class: className = '', title, ...attrs } = Astro.props;
 
 const base = 'px-6 py-2 rounded-md text-sm font-medium shadow-sm transition inline-flex items-center justify-center';
 const variants = {
@@ -24,7 +25,7 @@ const classes = `${base} ${variants[variant]} ${className}`;
 ---
 
 {href ? (
-  <a href={href} class={classes} title={title}><slot /></a>
+  <a href={href} class={classes} title={title} {...attrs}><slot /></a>
 ) : (
-  <button type={type} class={classes} title={title}><slot /></button>
+  <button type={type} class={classes} title={title} {...attrs}><slot /></button>
 )}

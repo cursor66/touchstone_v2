@@ -16,8 +16,3 @@ export const socials = [
   { name: '微信', icon: 'weixin', href: '#' },
   { name: '邮箱', icon: 'envelope', href: '#' },
 ] as const;
-
-export const defaultAvatar =
-  'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=' +
-  encodeURIComponent('minimalist flat illustration avatar portrait of a friendly young creator, soft blue background, clean vector style') +
-  '&image_size=square';

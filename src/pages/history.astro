@@ -1,56 +1,67 @@
 ---
 /**
- * 版本档案页：展示网站历次发布版本。
- * 当前为原型静态数据；正式环境应由 CI 或只读 API 从 PostgreSQL
- * deployments 表读取真实发布记录（见 db/migrations/001_init.sql）。
+ * 版本档案页：展示网站历次成功发布的真实记录。
+ * 数据来源：deploy.sh 每次部署成功后从 PostgreSQL deployments 表导出
+ * /data/history.json（静态文件，nginx 直接提供），本页客户端拉取渲染。
+ * 本地开发或无数据时显示空状态提示。
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHeading from '../components/layout/SectionHeading.astro';
-
-const releases = [
-  {
-    version: 'v1.2.0',
-    date: '2026-10-19',
-    title: '资源分享页上线',
-    notes: '新增资源详情页与分类导航',
-    commit: 'f72c6a1',
-  },
-  {
-    version: 'v1.1.0',
-    date: '2026-10-12',
-    title: '首页布局调整',
-    notes: '优化九宫格混排和内容卡片',
-    commit: 'd48b1e7',
-  },
-  {
-    version: 'v1.0.0',
-    date: '2026-10-01',
-    title: '网站首次发布',
-    notes: '文章、视频、资源基础功能',
-    commit: 'a13f9c2',
-  },
-];
 ---
 
 <BaseLayout title="版本档案" description="网站的演进记录">
   <main class="max-w-7xl mx-auto px-4 py-12">
     <div class="max-w-5xl mx-auto">
       <SectionHeading title="版本档案" />
-      <p class="text-sm text-gray-500 -mt-4 mb-8">网站的演进记录（当前为原型数据，正式数据来自发布数据库）。</p>
+      <p class="text-sm text-gray-500 -mt-4 mb-8">网站的演进记录（每次成功部署自动写入，数据来自发布数据库）。</p>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {releases.map((r) => (
-          <div class="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
-            <div class="flex items-baseline justify-between mb-3">
-              <span class="text-xl font-bold text-blue-600">{r.version}</span>
-              <span class="text-xs text-gray-400">{r.date}</span>
-            </div>
-            <h3 class="font-bold text-gray-900 mb-2">{r.title}</h3>
-            <p class="text-sm text-gray-500 leading-relaxed mb-6">{r.notes}</p>
-            <p class="text-xs text-gray-400 mt-auto">Commit: {r.commit}</p>
-          </div>
-        ))}
+      <div id="history-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
+
+      <div id="history-empty" class="hidden bg-white rounded-2xl p-8 border border-gray-200 text-center">
+        <p class="text-sm text-gray-500">暂无发布记录。完成一次线上部署后，这里会自动显示真实的版本历史。</p>
       </div>
     </div>
   </main>
 </BaseLayout>
+
+<script is:inline>
+  (function () {
+    const grid = document.getElementById('history-grid');
+    const empty = document.getElementById('history-empty');
+
+    function fmtDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      return isNaN(d) ? String(iso).slice(0, 10) : d.toLocaleDateString('zh-CN');
+    }
+
+    function card(r) {
+      const el = document.createElement('div');
+      el.className =
+        'bg-white rounded-2xl p-8 border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full';
+      el.innerHTML =
+        '<div class="flex items-baseline justify-between mb-3">' +
+        '<span class="text-xl font-bold text-blue-600"></span>' +
+        '<span class="text-xs text-gray-400"></span></div>' +
+        '<p class="text-sm text-gray-500 leading-relaxed mb-6"></p>' +
+        '<p class="text-xs text-gray-400 mt-auto"></p>';
+      const [version, date] = el.querySelectorAll('.flex span');
+      version.textContent = r.release_version;
+      date.textContent = fmtDate(r.deployed_at);
+      el.querySelector('.leading-relaxed').textContent = r.release_notes || '本次发布未填写说明';
+      el.querySelector('.mt-auto').textContent = 'Commit: ' + String(r.git_sha || '').slice(0, 7);
+      return el;
+    }
+
+    fetch('/data/history.json')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((rows) => {
+        if (!Array.isArray(rows) || rows.length === 0) {
+          empty.classList.remove('hidden');
+          return;
+        }
+        rows.forEach((r) => grid.appendChild(card(r)));
+      })
+      .catch(() => empty.classList.remove('hidden'));
+  })();
+</script>

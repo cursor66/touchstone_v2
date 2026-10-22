@@ -125,6 +125,12 @@ git push origin main           # 自动构建镜像并部署（build-N 版本）
 ./scripts/release.sh v1.0.0    # 打 tag 发布正式版本
 ```
 
-CI 流程（`.github/workflows/deploy.yml`）：内容校验 → 构建 → 推送 GHCR 镜像 → SSH 到 1Panel 服务器执行 `deploy/deploy.sh` → 健康检查 → 写入 PostgreSQL `deployments` 表 → 失败自动回滚镜像配置。
+CI 流程（`.github/workflows/deploy.yml`）：内容校验 → 构建 → 推送 GHCR 镜像 → 生成内容索引 SQL 并上传 → SSH 到 1Panel 服务器执行 `deploy/deploy.sh` → 健康检查 → 写入 PostgreSQL `deployments` 表 → 失败自动回滚镜像配置。
 
-服务器侧需在 `/opt/creative-site/` 放置 `compose.yaml` 与 `.env.production`（参考 `deploy/.env.production.example`），数据库首次启动自动执行 `db/migrations/001_init.sql`；`deployments` 只记录发布事件，恢复历史版本依赖保留的 Git commit 与镜像。版本档案页 `/history` 当前为原型数据，后续应接入真实发布记录。
+服务器侧需在 `/opt/creative-site/` 放置 `compose.yaml` 与 `.env.production`（参考 `deploy/.env.production.example`），数据库首次启动自动执行 `db/migrations/001_init.sql`；`deployments` 只记录发布事件，恢复历史版本依赖保留的 Git commit 与镜像。
+
+### PostgreSQL 数据链路
+
+- **内容索引**：`scripts/sync-content-db.mjs` 扫描 `content/` 生成幂等 upsert SQL（本地可运行 `node scripts/sync-content-db.mjs > contents.sql` 预览），CI 上传服务器后由 `deploy.sh` 写入 `contents` 表，与 Git 中 Markdown 保持一致（含已删除内容的清理）。
+- **发布记录**：每次部署成功写入 `deployments` 表一条记录（版本号 / commit SHA / 镜像引用 / 时间）。
+- **版本元数据读取**：部署成功后 `deploy.sh` 将最近 50 条成功发布导出为 `/opt/creative-site/data/history.json`，经 compose bind mount 由 nginx 以 `/data/history.json` 静态提供；`/history` 版本档案页客户端拉取渲染，无需运行时数据库连接。

@@ -85,6 +85,32 @@ ON CONFLICT (release_version)
 DO NOTHING;
 SQL
 
+    # 同步内容索引（CI 生成并上传的 contents.sql）。
+    if [ -f "$APP_DIR/contents.sql" ]; then
+      docker compose \
+        --env-file "$ENV_FILE" \
+        -f "$COMPOSE_FILE" \
+        exec -T db \
+        psql -v ON_ERROR_STOP=1 \
+          -U "$POSTGRES_USER" \
+          -d "$POSTGRES_DB" \
+          < "$APP_DIR/contents.sql" \
+        && echo "Content index synced"
+    fi
+
+    # 导出发布历史，供 /history 页静态读取（无需运行时数据库连接）。
+    mkdir -p "$APP_DIR/data"
+    docker compose \
+      --env-file "$ENV_FILE" \
+      -f "$COMPOSE_FILE" \
+      exec -T db \
+      psql -t -A \
+        -U "$POSTGRES_USER" \
+        -d "$POSTGRES_DB" \
+        -c "SELECT COALESCE(json_agg(row_to_json(t)), '[]'::json) FROM (SELECT release_version, git_sha, status, deployed_at, release_notes FROM deployments WHERE status = 'success' ORDER BY deployed_at DESC NULLS LAST LIMIT 50) t" \
+      > "$APP_DIR/data/history.json" \
+      && echo "History exported: $(wc -c < "$APP_DIR/data/history.json") bytes"
+
     echo "Release $VERSION deployed: $GIT_SHA"
     exit 0
   fi

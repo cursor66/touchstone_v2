@@ -81,6 +81,26 @@ jobs:
     environment: production
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Generate content index SQL
+        run: node scripts/sync-content-db.mjs > contents.sql
+
+      - name: Upload content index SQL
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "contents.sql"
+          target: "/opt/creative-site/"
+
       - name: Deploy to 1Panel server
         uses: appleboy/ssh-action@v1
         env:

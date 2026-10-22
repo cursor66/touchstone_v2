@@ -12,7 +12,6 @@ import ContentCard from '../components/cards/ContentCard.astro';
 import SeriesCard from '../components/cards/SeriesCard.astro';
 import SectionHeading from '../components/layout/SectionHeading.astro';
 import { series } from '../data/series';
-import { defaultAvatar } from '../data/site';
 
 if (!import.meta.env.DEV) {
   return Astro.redirect('/');
@@ -121,30 +120,18 @@ const radii = [
             href="#"
             cover={`https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent('minimal desk with notebook coffee and morning sunlight, study scene, soft focus photography')}&image_size=landscape_16_9`}
             type="article"
-            author="卡卡"
-            avatar={defaultAvatar}
-            likes={93}
-            comments={24}
           />
           <ContentCard
             title="视频卡片：type=video（悬浮显示播放标）"
             href="#"
             cover={`https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent('child holding camera photographing flowers in a sunny park, joyful candid moment, warm photography')}&image_size=landscape_16_9`}
             type="video"
-            author="卡卡"
-            avatar={defaultAvatar}
-            likes={120}
-            comments={18}
           />
           <ContentCard
             title="资源卡片：type=resource"
             href="#"
             cover={`https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent('stack of books with e-reader on wooden table, warm library light, cozy photography')}&image_size=landscape_16_9`}
             type="resource"
-            author="卡卡"
-            avatar={defaultAvatar}
-            likes={73}
-            comments={14}
           />
         </div>
       </section>

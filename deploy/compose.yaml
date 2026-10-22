@@ -4,6 +4,9 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:18080:80"
+    volumes:
+      # 部署产物数据（history.json 由 deploy.sh 生成，nginx 只读提供）
+      - ./data:/usr/share/nginx/html/data:ro
     networks:
       - site-net
     healthcheck:
