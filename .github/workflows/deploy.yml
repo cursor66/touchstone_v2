@@ -79,6 +79,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     environment: production
+    # 服务器未就绪前：push main 只构建验证，打 v* 标签或手动触发才部署
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
 
     steps:
       - name: Checkout

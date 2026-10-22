@@ -120,12 +120,12 @@ githubUrl: "…"             # 仅 resource 可选
 ```bash
 git add content/ src/
 git commit -m "feat: publish YOLO26 ONNX article"
-git push origin main           # 自动构建镜像并部署（build-N 版本）
+git push origin main           # 构建验证 + 推送 GHCR 镜像（build-N 版本，不部署）
 
-./scripts/release.sh v1.0.0    # 打 tag 发布正式版本
+./scripts/release.sh v1.0.0    # 打 tag 发布正式版本并触发部署
 ```
 
-CI 流程（`.github/workflows/deploy.yml`）：内容校验 → 构建 → 推送 GHCR 镜像 → 生成内容索引 SQL 并上传 → SSH 到 1Panel 服务器执行 `deploy/deploy.sh` → 健康检查 → 写入 PostgreSQL `deployments` 表 → 失败自动回滚镜像配置。
+CI 流程（`.github/workflows/deploy.yml`）：内容校验 → 构建 → 推送 GHCR 镜像；**部署仅在打 `v*` 标签或手动触发时执行**（push main 不部署）：生成内容索引 SQL 并上传 → SSH 到 1Panel 服务器执行 `deploy/deploy.sh` → 健康检查 → 写入 PostgreSQL `deployments` 表 → 失败自动回滚镜像配置。
 
 服务器侧需在 `/opt/creative-site/` 放置 `compose.yaml` 与 `.env.production`（参考 `deploy/.env.production.example`），数据库首次启动自动执行 `db/migrations/001_init.sql`；`deployments` 只记录发布事件，恢复历史版本依赖保留的 Git commit 与镜像。
 
