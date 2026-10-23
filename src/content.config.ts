@@ -16,6 +16,7 @@ const baseSchema = z.object({
   author: z.string().default('卡卡'),
   likes: z.number().default(0),
   comments: z.number().default(0),
+  views: z.number().default(0),
   videoUrl: z.string().optional(),
   downloadUrl: z.string().optional(),
   githubUrl: z.string().optional(),

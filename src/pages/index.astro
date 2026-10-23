@@ -52,11 +52,14 @@ for (const { entry } of items) {
             data-title={entry.data.title.toLowerCase()}
           >
             <ContentCard
-              title={entry.data.title}
-              href={href}
-              cover={entry.data.cover}
-              type={type}
-            />
+            title={entry.data.title}
+            href={href}
+            cover={entry.data.cover}
+            type={type}
+            date={entry.data.date}
+            views={entry.data.views}
+            comments={entry.data.comments}
+          />
           </div>
         ))}
       </div>

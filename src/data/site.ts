@@ -16,3 +16,17 @@ export const socials = [
   { name: '微信', icon: 'weixin', href: '#' },
   { name: '邮箱', icon: 'envelope', href: '#' },
 ] as const;
+
+/**
+ * Giscus 评论配置（GitHub Discussions 驱动）
+ * 启用步骤见 README「评论系统」一节：
+ * 1. 仓库开启 Discussions 2. 安装 giscus App 3. 在 https://giscus.app/zh-CN 生成 repoId / categoryId 填入
+ * 未配置时详情页评论区显示占位提示，不影响其他功能。
+ */
+export const giscus = {
+  repo: 'cursor66/touchstone_v2',
+  repoId: '',
+  category: 'General',
+  categoryId: '',
+  mapping: 'pathname',
+} as const;

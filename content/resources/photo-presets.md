@@ -10,6 +10,7 @@ tags:
 status: "published"
 likes: 98
 comments: 23
+views: 1170
 downloadUrl: "https://example.com/dl/film-presets.zip"
 ---
 

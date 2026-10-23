@@ -27,6 +27,9 @@ const { title, items } = Astro.props;
             href={href}
             cover={entry.data.cover}
             type={type}
+            date={entry.data.date}
+            views={entry.data.views}
+            comments={entry.data.comments}
           />
         ))}
       </div>

@@ -8,6 +8,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Button from '../ui/Button.astro';
 import Icon from '../ui/Icon.astro';
+import Giscus from '../comments/Giscus.astro';
 import type { AnyEntry } from '../../utils/content';
 
 interface Props {
@@ -27,8 +28,9 @@ const dateText = data.date.toLocaleDateString('zh-CN');
       <div class="flex items-center space-x-4 text-xs text-gray-400 mb-6">
         <span>{data.author}</span>
         <span>{dateText}</span>
+        <span class="flex items-center"><Icon name="eye" class="w-4 h-4 mr-1" /> <span id="busuanzi_value_page_pv">{data.views}</span> 阅读</span>
         <span class="flex items-center"><Icon name="heart" class="w-3.5 h-3.5 mr-1" /> {data.likes}</span>
-        <span class="flex items-center"><Icon name="comment" class="w-3.5 h-3.5 mr-1" /> {data.comments}</span>
+        <a href="#comments" class="flex items-center hover:text-blue-600 transition"><Icon name="comment" class="w-3.5 h-3.5 mr-1" /> {data.comments}</a>
       </div>
 
       <img src={data.cover} alt={data.title} class="w-full rounded-xl mb-8" />
@@ -63,6 +65,12 @@ const dateText = data.date.toLocaleDateString('zh-CN');
           ))}
         </div>
       )}
+
+      <!-- 评论区（Giscus / GitHub Discussions） -->
+      <section id="comments" class="mt-12 pt-8 border-t border-gray-100">
+        <h2 class="text-lg font-bold text-gray-900 mb-6">评论</h2>
+        <Giscus />
+      </section>
     </article>
   </main>
 </BaseLayout>

@@ -10,6 +10,7 @@ tags:
 status: "published"
 likes: 120
 comments: 18
+views: 1690
 videoUrl: "https://example.com/videos/child-world"
 ---
 

@@ -115,6 +115,17 @@ githubUrl: "…"             # 仅 resource 可选
 - URL 使用稳定的文件名 slug（如 `/articles/yolo26-onnx/`），不要依赖标题或日期。
 - `npm run check` 会在本地与 CI 校验必填字段、取值范围与日期格式。
 
+## 评论系统（Giscus）
+
+评论由 GitHub Discussions 驱动（无需自建后端），启用步骤：
+
+1. 仓库 Settings → General → Features 勾选 **Discussions**
+2. 安装 [Giscus App](https://github.com/apps/giscus) 并授权本仓库
+3. 打开 [giscus.app/zh-CN](https://giscus.app/zh-CN)，输入仓库名，复制生成的 `data-repo-id` 与 `data-category-id`
+4. 填入 [src/data/site.ts](src/data/site.ts) 的 `giscus.repoId` / `giscus.categoryId`
+
+未配置时详情页评论区显示占位提示。阅读数由[不蒜子](https://busuanzi.ibruce.info/)统计（详情页实时），卡片上的阅读数/评论数为 frontmatter 中的种子值，详情页显示实时数据。
+
 ## 发布与部署
 
 ```bash

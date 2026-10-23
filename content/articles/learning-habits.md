@@ -10,6 +10,7 @@ tags:
 status: "published"
 likes: 93
 comments: 24
+views: 1860
 ---
 
 # 高效学习的5个小习惯：如何更好地管理你的精力和时间

@@ -1,4 +1,4 @@
----
+﻿---
 /**
  * 设计系统预览页（仅开发环境可访问）
  * 用于验证组件复用效果与样式还原质量：颜色、字体、按钮、卡片、表单、布局。
@@ -127,20 +127,17 @@ const radii = [
             title="文章卡片：type=article（无播放标）"
             href="#"
             cover={`https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent('minimal desk with notebook coffee and morning sunlight, study scene, soft focus photography')}&image_size=landscape_16_9`}
-            type="article"
-          />
+            type="article"`n            date={new Date('2026-10-15')}`n            views={1280}`n            comments={23}`n          />
           <ContentCard
             title="视频卡片：type=video（悬浮显示播放标）"
             href="#"
             cover={`https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent('child holding camera photographing flowers in a sunny park, joyful candid moment, warm photography')}&image_size=landscape_16_9`}
-            type="video"
-          />
+            type="video"`n            date={new Date('2026-10-15')}`n            views={1280}`n            comments={23}`n          />
           <ContentCard
             title="资源卡片：type=resource"
             href="#"
             cover={`https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent('stack of books with e-reader on wooden table, warm library light, cozy photography')}&image_size=landscape_16_9`}
-            type="resource"
-          />
+            type="resource"`n            date={new Date('2026-10-15')}`n            views={1280}`n            comments={23}`n          />
         </div>
       </section>
 

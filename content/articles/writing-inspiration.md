@@ -9,6 +9,7 @@ tags:
 status: "published"
 likes: 64
 comments: 15
+views: 500
 ---
 
 # 创意写作的灵感源泉：如何捕捉生活中的闪光点

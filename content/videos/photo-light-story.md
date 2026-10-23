@@ -9,6 +9,7 @@ tags:
 status: "published"
 likes: 88
 comments: 21
+views: 1430
 videoUrl: "https://example.com/videos/light-story"
 ---
 

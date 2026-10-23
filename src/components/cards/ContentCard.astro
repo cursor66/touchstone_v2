@@ -3,6 +3,7 @@
  * 内容卡片
  * 文章 / 视频 / 资源三种类型共用此卡片：
  * - type="video" 时封面右上角悬浮播放按钮
+ * - 底部信息栏：发布时间 + 阅读数 + 评论数
  * - 通过 props 扩展，禁止复制样式新建相似卡片
  */
 import Icon from '../ui/Icon.astro';
@@ -12,9 +13,13 @@ interface Props {
   href: string;
   cover: string;
   type?: 'article' | 'video' | 'resource';
+  date: Date;
+  views?: number;
+  comments?: number;
 }
 
-const { title, href, cover, type = 'article' } = Astro.props;
+const { title, href, cover, type = 'article', date, views = 0, comments = 0 } = Astro.props;
+const dateText = date.toISOString().slice(0, 10);
 ---
 
 <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
@@ -27,8 +32,20 @@ const { title, href, cover, type = 'article' } = Astro.props;
     )}
   </a>
   <div class="p-5">
-    <h3 class="font-bold text-gray-900 line-clamp-2 hover:text-blue-600 transition cursor-pointer">
+    <h3 class="font-bold text-gray-900 line-clamp-2 hover:text-blue-600 transition cursor-pointer mb-3">
       <a href={href}>{title}</a>
     </h3>
+    <div class="flex items-center justify-between text-xs text-gray-400">
+      <span class="flex items-center">
+        <Icon name="calendar" class="w-3.5 h-3.5 mr-1" />
+        <time datetime={dateText}>{dateText}</time>
+      </span>
+      <span class="flex items-center space-x-3">
+        <span class="flex items-center"><Icon name="eye" class="w-4 h-4 mr-1" />{views}</span>
+        <a href={`${href}#comments`} class="flex items-center hover:text-blue-600 transition">
+          <Icon name="comment" class="w-3.5 h-3.5 mr-1" />{comments}
+        </a>
+      </span>
+    </div>
   </div>
 </div>

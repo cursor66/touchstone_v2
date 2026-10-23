@@ -10,6 +10,7 @@ tags:
 status: "published"
 likes: 56
 comments: 9
+views: 890
 downloadUrl: "https://example.com/dl/yolo26-onnx.zip"
 githubUrl: "https://github.com/example/yolo26-onnx"
 ---

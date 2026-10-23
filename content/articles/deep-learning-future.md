@@ -10,6 +10,7 @@ tags:
 status: "published"
 likes: 192
 comments: 27
+views: 2150
 ---
 
 # 深度学习与人工智能：技术驱动下的未来生活图景

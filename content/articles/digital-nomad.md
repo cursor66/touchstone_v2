@@ -9,6 +9,7 @@ tags:
 status: "published"
 likes: 210
 comments: 45
+views: 500
 ---
 
 # 我的数字游民生活：在不同的城市寻找创作灵感

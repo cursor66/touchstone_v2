@@ -9,6 +9,7 @@ tags:
 status: "published"
 likes: 73
 comments: 14
+views: 500
 downloadUrl: "https://example.com/dl/reading-list.pdf"
 ---
 

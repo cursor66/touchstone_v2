@@ -10,6 +10,7 @@ tags:
 status: "published"
 likes: 85
 comments: 12
+views: 1280
 ---
 
 # AI时代，个人成长的新机会与核心竞争力

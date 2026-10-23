@@ -1,0 +1,36 @@
+---
+/**
+ * Giscus 评论区：由 GitHub Discussions 驱动，无需自建后端。
+ * 未在 src/data/site.ts 配置 repoId/categoryId 时渲染占位提示。
+ */
+import { giscus } from '../../data/site';
+
+const configured = Boolean(giscus.repoId && giscus.categoryId);
+---
+
+{configured ? (
+  <script
+    is:inline
+    src="https://giscus.app/client.js"
+    data-repo={giscus.repo}
+    data-repo-id={giscus.repoId}
+    data-category={giscus.category}
+    data-category-id={giscus.categoryId}
+    data-mapping={giscus.mapping}
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="light"
+    data-lang="zh-CN"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async
+  ></script>
+) : (
+  <div class="border border-dashed border-gray-200 rounded-xl p-8 text-center text-sm text-gray-400">
+    评论区未启用：请在 <code class="text-blue-600">src/data/site.ts</code> 中填写 Giscus 的
+    <code class="text-blue-600">repoId</code> 与 <code class="text-blue-600">categoryId</code>
+    （<a href="https://giscus.app/zh-CN" target="_blank" rel="noopener" class="text-blue-600 hover:underline">giscus.app</a> 生成）
+  </div>
+)}
