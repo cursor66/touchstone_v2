@@ -8,7 +8,6 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Button from '../ui/Button.astro';
 import Icon from '../ui/Icon.astro';
-import Giscus from '../comments/Giscus.astro';
 import type { AnyEntry } from '../../utils/content';
 
 interface Props {
@@ -58,11 +57,152 @@ const { data } = entry;
         </div>
       )}
 
-      <!-- 评论区（Giscus / GitHub Discussions） -->
+      <!-- 评论区（自建：记录 + 展示；观看数自建统计，每会话每篇计一次） -->
       <section id="comments" class="mt-12 pt-8 border-t border-gray-100">
-        <h2 class="text-lg font-bold text-gray-900 mb-6">评论</h2>
-        <Giscus />
+        <div class="flex items-baseline justify-between mb-6">
+          <h2 class="text-lg font-bold text-gray-900">评论</h2>
+          <span class="text-xs text-gray-400 flex items-center">
+            <Icon name="eye" class="w-3.5 h-3.5 mr-1" />
+            <span id="view-count">{data.views}</span> 次阅读
+          </span>
+        </div>
+
+        <form id="comment-form" class="mb-8">
+          <textarea id="comment-body" rows="3" maxlength="1000" required placeholder="写下你的想法… "
+            class="w-full mb-3 px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          <input type="hidden" id="comment-parent" value="" />
+          <div class="flex items-center gap-3">
+            <Button type="submit">发表评论</Button>
+            <span id="comment-reply-to" class="text-xs text-blue-600 hidden"></span>
+            <span id="comment-hint" class="text-xs text-gray-400"></span>
+          </div>
+        </form>
+
+        <div id="comment-list" class="space-y-4"></div>
       </section>
     </article>
   </main>
 </BaseLayout>
+
+<script define:vars={{ slug: entry.id }}>
+  const STATS_API = `/api/stats/${slug}`;
+  const COMMENTS_API = `/api/comments/${slug}`;
+
+  const esc = (s) => {
+    const d = document.createElement('div');
+    d.textContent = String(s ?? '');
+    return d.innerHTML;
+  };
+
+  // 观看数：sessionStorage 去重，本地 astro dev 无 Functions 时静默降级
+  (async () => {
+    try {
+      const key = `viewed:${slug}`;
+      if (!sessionStorage.getItem(key)) {
+        await fetch(STATS_API, { method: 'POST' });
+        sessionStorage.setItem(key, '1');
+      }
+      const res = await fetch(STATS_API);
+      const data = await res.json();
+      if (typeof data.views === 'number') {
+        document.getElementById('view-count').textContent = data.views;
+      }
+    } catch { /* 降级：保留 frontmatter 初始值 */ }
+  })();
+
+  const listBox = document.getElementById('comment-list');
+  const form = document.getElementById('comment-form');
+  const hint = document.getElementById('comment-hint');
+  const replyTo = document.getElementById('comment-reply-to');
+  const parentInput = document.getElementById('comment-parent');
+
+  function render(list) {
+    if (!list.length) {
+      listBox.innerHTML = '<p class="text-sm text-gray-400">还没有评论，来抢沙发。</p>';
+      return;
+    }
+    const tops = list.filter((c) => !c.parent_id);
+    const replies = list.filter((c) => c.parent_id);
+    listBox.innerHTML = tops.map((c) => `
+      <div class="bg-gray-50 rounded-lg p-4">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-sm font-medium text-gray-800">${esc(c.author_name)}</span>
+          <span class="text-xs text-gray-400">${esc((c.created_at || '').slice(0, 16))}</span>
+        </div>
+        <p class="text-sm text-gray-700 whitespace-pre-wrap">${esc(c.body)}</p>
+        <button type="button" data-reply="${c.id}" data-name="${esc(c.author_name)}"
+          class="mt-2 text-xs text-blue-600 hover:underline">回复</button>
+        ${replies.filter((r) => r.parent_id === c.id).map((r) => `
+          <div class="mt-3 ml-4 pl-3 border-l-2 border-gray-200">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-medium text-gray-600">${esc(r.author_name)}</span>
+              <span class="text-xs text-gray-400">${esc((r.created_at || '').slice(0, 16))}</span>
+            </div>
+            <p class="text-sm text-gray-600 whitespace-pre-wrap">${esc(r.body)}</p>
+          </div>`).join('')}
+      </div>`).join('');
+
+    listBox.querySelectorAll('[data-reply]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        parentInput.value = btn.dataset.reply;
+        replyTo.textContent = `回复 ${btn.dataset.name}（点击昵称可取消）`;
+        replyTo.classList.remove('hidden');
+        document.getElementById('comment-body').focus();
+      });
+    });
+  }
+
+  replyTo.addEventListener('click', () => {
+    parentInput.value = '';
+    replyTo.classList.add('hidden');
+  });
+
+  async function loadComments() {
+    try {
+      const res = await fetch(COMMENTS_API);
+      const list = await res.json();
+      render(Array.isArray(list) ? list : []);
+    } catch {
+      render([]);
+    }
+  }
+
+  // 访客身份：localStorage 持久化 vid，服务端据此分配显示名
+  const vid = (() => {
+    let v = localStorage.getItem('visitor_id');
+    if (!/^[a-f0-9]{8}$/.test(v || '')) {
+      v = [...crypto.getRandomValues(new Uint8Array(4))].map((b) => b.toString(16).padStart(2, '0')).join('');
+      localStorage.setItem('visitor_id', v);
+    }
+    return v;
+  })();
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hint.textContent = '提交中…';
+    const payload = {
+      vid,
+      body: document.getElementById('comment-body').value,
+      parent_id: parentInput.value ? Number(parentInput.value) : null,
+    };
+    try {
+      const res = await fetch(COMMENTS_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || '提交失败');
+      form.reset();
+      parentInput.value = '';
+      replyTo.classList.add('hidden');
+      hint.textContent = '已发表';
+      setTimeout(() => (hint.textContent = ''), 3000);
+      loadComments();
+    } catch (err) {
+      hint.textContent = err.message;
+    }
+  });
+
+  loadComments();
+</script>

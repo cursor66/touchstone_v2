@@ -311,6 +311,111 @@ CREATE TABLE IF NOT EXISTS site_current_release (
 
 这里有一个需要注意的地方：`deployments` 只记录发布事件，不是完整的文件备份。真正恢复历史网站时，必须保留对应的 Git commit 和 Cloudflare Pages 部署快照。
 
+### 4.1 表结构总览
+
+| 表 | 角色 | 写入方 | 读取方 |
+| --- | --- | --- | --- |
+| `contents` | 内容元数据索引（Git 的物化视图） | CI：`sync-content-db.mjs` | 未来管理后台 / 搜索 |
+| `deployments` | 每次发布的只追加日志 | CI：`record-deployment.mjs` | `/api/deployments` → `/history` 页 |
+| `deployment_events` | 发布状态变化审计（预留） | 未来扩展 | 未来管理后台 |
+| `site_current_release` | 当前线上版本指针（单行） | CI：`record-deployment.mjs` | 未来站点健康检查 |
+
+### 4.2 字段设计要点
+
+**contents**
+
+- `id` 直接取 `slug`，不使用独立 UUID：内容的唯一身份就是 slug（文件名），`ON CONFLICT (slug)` 是幂等 upsert 的锚点。
+- `status` 来自 Markdown frontmatter，Git 是唯一事实源；数据库不引入独立的发布状态机。
+- `source_path` 保存仓库内相对路径（统一 `/` 分隔），便于从数据库反查 Markdown 源文件。
+- `updated_at` 每次同步刷新，`created_at` 只在首次插入时写入。
+
+**deployments**
+
+- `release_version` 设 `UNIQUE` 约束，是幂等键：CI 重跑同一 tag 时使用 `ON CONFLICT DO NOTHING`，不会产生重复记录。
+- `pages_deployment_id` 实际存储 Pages 的**不可变预览 URL**（如 `https://5cae30a0.my-creative-site.pages.dev`），一个字段同时充当部署标识和历史快照链接，`/history` 页的「预览该版本」直接用它。
+- `git_sha` 存完整 40 位 SHA，配合 `release_version`（tag）可精确定位源码。
+- `deployed_at` 存业务发布时间，`created_at` 是记录写入时间；两者在重试场景下会不同，查询展示用前者。
+- `finished_at` / `triggered_by` / `release_notes` 为预留列，当前脚本不写，避免为假设需求增加复杂度。
+
+**site_current_release**
+
+- 单行表，`site_key` 固定为 `'production'`。与 `deployments.status` 分离：`status` 描述「这次部署本身是否成功」，指针描述「线上现在指向谁」。回滚操作只动指针，不改历史记录。
+
+### 4.3 写入路径与一致性规则
+
+```
+内容同步（每次部署）
+  content/**/*.md ──sync-content-db.mjs──> upsert by slug
+                                        └> DELETE 差集（Git 中已删除的同步出库）
+
+发布记录（部署成功后）
+  wrangler pages deploy ──record-deployment.mjs──> deployments upsert (release_version)
+                                                └> site_current_release 指针更新
+                                                └> 失败时指数退避重试 3 次
+```
+
+三条一致性规则：
+
+1. **contents 可随时重建**：它是 Git 的物化视图，删表重跑同步脚本即可恢复，不算数据事故。
+2. **deployments 只追加不改**：发布历史是不可变事实，回滚产生新记录而不是修改旧记录。
+3. **写入失败 ≠ 部署失败**：Pages 部署已成功而 D1 写入失败时，重试 + 告警，不自动回滚已上线站点。
+
+### 4.4 演进预留
+
+| 演进方向 | 支撑方式 |
+| --- | --- |
+| 浏览量 / 点赞等计数 | 新增 `content_stats` 表，不污染 contents（读写分离） |
+| 发布审批 / 状态流转 | 启用 `deployment_events`，记录 deploying→success 各阶段 |
+| 多环境（staging） | `site_current_release.site_key` 天然支持多指针 |
+| 迁回自托管 PostgreSQL | DDL 均为标准 SQL 子集，仅需替换 `datetime('now')` 默认值与方言细节 |
+
+### 4.5 规划表：互动数据（创作时间 / 观看数 / 评论答复）
+
+现状是这三类数据分散在三处外部系统中：
+
+| 数据 | 当前载体 | 局限 |
+| --- | --- | --- |
+| 创作时间 | Markdown frontmatter `date` | 已同步进 Git，但 contents 表尚无对应列，数据库侧不可查询 |
+| 观看数 | 不蒜子（busuanzi）第三方计数 | 数据在别人手里，无法统计、无法迁移、服务停则清零 |
+| 评论及答复 | Giscus（GitHub Discussions） | 依赖 GitHub 账号登录，数据在 Discussions 而非自有库 |
+
+规划两张新表（**已于 v1.0.2 实施**，见 `db/migrations/002_interaction.sql` 与 `functions/api/stats|comments`）：
+
+```sql
+-- 内容互动计数：观看 / 点赞等高频写、低一致性的数据
+CREATE TABLE IF NOT EXISTS content_stats (
+    slug TEXT PRIMARY KEY REFERENCES contents(id),
+    views INTEGER NOT NULL DEFAULT 0,
+    likes INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- 自有评论：评论与答复（楼中楼一级回复足够）
+CREATE TABLE IF NOT EXISTS comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug TEXT NOT NULL REFERENCES contents(id),
+    parent_id INTEGER REFERENCES comments(id),   -- NULL=顶层评论，否则为答复
+    author_name TEXT NOT NULL,
+    author_contact TEXT,                          -- 可选，邮箱/主页
+    body TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'published'      -- 即录即显；改 'pending' 即先审后发
+        CHECK (status IN ('pending', 'published', 'rejected')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_comments_slug ON comments (slug, status, created_at);
+```
+
+设计要点：
+
+- **读写分离**：`content_stats` 是高频更新表，与 `contents`（同步重建的物化视图）分开，避免内容同步时计数被覆盖；slug 外键保证内容删除时可级联清理。
+- **创作时间的归宿**：不建独立字段表，而是给 `contents` 加 `published_at` 列（来自 frontmatter `date`），同步脚本一并写入——静态事实归 Git/contents，动态计数归 content_stats。
+- **评论简化策略（当前实现）**：即录即显，`status` 默认 `'published'`；预留屏蔽能力——把表默认值改为 `'pending'` 即切换为先审后发，前端 GET 只查 published，待审评论自动隐藏。答复通过 `parent_id` 单级关联，不做无限嵌套。
+- **访客身份**：无需填写昵称。前端在 localStorage 生成持久 `visitor_id`（8 位十六进制），服务端据此分配显示名「访客_xxxxxxxx」；vid 缺失或非法时服务端随机兜底。同一浏览器的评论身份保持连续。
+- **观看数去重**：服务端不强校验，前端 sessionStorage 保证每会话每篇只计一次；内容尚未同步入库时计数接口返回 202 降级，不影响阅读。
+- **历史 Giscus 评论**：自建评论上线后 Giscus 已移除，历史评论保留在 GitHub Discussions 存档，不迁移。
+- **后续增强（未实施）**：垃圾评论攻防（Cloudflare Turnstile）、审核界面、答复邮件通知——按需迭代。
+
 ### 发布历史数据示例
 
 | 版本       | Git commit | 状态      | 用途      |
