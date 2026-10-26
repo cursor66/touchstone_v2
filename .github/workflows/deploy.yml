@@ -76,6 +76,13 @@ jobs:
 
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
+      - name: Ensure Pages project exists
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        # 新版 wrangler 不再在 deploy 时自动建项目；已存在时创建会报错，忽略之
+        run: npx wrangler pages project create my-creative-site --production-branch=main || echo "project may already exist, continue"
+
       - name: Deploy to Cloudflare Pages
         id: pages
         uses: cloudflare/wrangler-action@v3
