@@ -89,7 +89,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=my-creative-site
+          command: pages deploy dist --project-name=my-creative-site --branch=main
 
       - name: Generate content index SQL
         run: node scripts/sync-content-db.mjs > contents.sql
