@@ -18,20 +18,12 @@ interface Props {
 
 const { entry, type } = Astro.props;
 const { data } = entry;
-const dateText = data.date.toLocaleDateString('zh-CN');
 ---
 
 <BaseLayout title={data.title} description={data.summary}>
   <main class="max-w-7xl mx-auto px-4 py-12">
     <article class="max-w-2xl mx-auto">
       <h1 class="text-3xl font-bold text-gray-900 leading-tight mb-4">{data.title}</h1>
-      <div class="flex items-center space-x-4 text-xs text-gray-400 mb-6">
-        <span>{data.author}</span>
-        <span>{dateText}</span>
-        <span class="flex items-center"><Icon name="eye" class="w-4 h-4 mr-1" /> <span id="busuanzi_value_page_pv">{data.views}</span> 阅读</span>
-        <span class="flex items-center"><Icon name="heart" class="w-3.5 h-3.5 mr-1" /> {data.likes}</span>
-        <a href="#comments" class="flex items-center hover:text-blue-600 transition"><Icon name="comment" class="w-3.5 h-3.5 mr-1" /> {data.comments}</a>
-      </div>
 
       <img src={data.cover} alt={data.title} class="w-full rounded-xl mb-8" />
 
