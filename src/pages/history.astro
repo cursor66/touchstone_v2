@@ -1,9 +1,10 @@
 ---
 /**
  * 版本档案页：展示网站历次成功发布的真实记录。
- * 数据来源：deploy.sh 每次部署成功后从 PostgreSQL deployments 表导出
- * /data/history.json（静态文件，nginx 直接提供），本页客户端拉取渲染。
- * 本地开发或无数据时显示空状态提示。
+ * 数据来源：Cloudflare D1 deployments 表，由 Pages Function
+ * GET /api/deployments 提供只读查询，本页客户端拉取渲染。
+ * 卡片附带 Pages 历史预览链接（每次部署的不可变快照 URL）。
+ * 本地开发（无 D1 绑定）或无数据时显示空状态提示。
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHeading from '../components/layout/SectionHeading.astro';
@@ -49,11 +50,22 @@ import SectionHeading from '../components/layout/SectionHeading.astro';
       version.textContent = r.release_version;
       date.textContent = fmtDate(r.deployed_at);
       el.querySelector('.leading-relaxed').textContent = r.release_notes || '本次发布未填写说明';
-      el.querySelector('.mt-auto').textContent = 'Commit: ' + String(r.git_sha || '').slice(0, 7);
+      const meta = el.querySelector('.mt-auto');
+      meta.textContent = 'Commit: ' + String(r.git_sha || '').slice(0, 7);
+      // Pages 每次部署生成不可变预览 URL，作为历史版本快照入口
+      if (r.pages_deployment_id && /^https:\/\//.test(r.pages_deployment_id)) {
+        const link = document.createElement('a');
+        link.href = r.pages_deployment_id;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.className = 'text-xs text-blue-600 hover:underline mt-2 inline-block';
+        link.textContent = '预览该版本 →';
+        el.appendChild(link);
+      }
       return el;
     }
 
-    fetch('/data/history.json')
+    fetch('/api/deployments')
       .then((res) => (res.ok ? res.json() : []))
       .then((rows) => {
         if (!Array.isArray(rows) || rows.length === 0) {

@@ -1,0 +1,10 @@
+name = "my-creative-site"
+compatibility_date = "2026-10-01"
+pages_build_output_dir = "dist"
+
+# 创建数据库：npx wrangler d1 create creative-site-db
+# 将返回的 database_id 填入下方
+[[d1_databases]]
+binding = "DB"
+database_name = "creative-site-db"
+database_id = "c6a0d566-f21c-414e-a7a8-a970ee80922e"

@@ -33,11 +33,14 @@ npm run preview    # 本地预览构建产物
 │   ├── utils/             # getAllContent 等内容查询
 │   └── content.config.ts  # 内容集合 schema（构建期校验 Frontmatter）
 ├── content/               # Markdown 内容：articles / videos / resources
-├── db/migrations/         # PostgreSQL DDL（发布历史与内容索引）
-├── deploy/                # Dockerfile / nginx.conf / compose.yaml / deploy.sh
-├── scripts/               # validate-content.mjs / release.sh
-└── .github/workflows/     # deploy.yml（推送后自动构建部署）
+├── db/migrations/         # Cloudflare D1 (SQLite) DDL：发布历史与内容索引
+├── functions/api/         # Pages Functions：deployments.js（发布历史只读 API）
+├── scripts/               # validate-content / sync-content-db / record-deployment / release.sh
+├── wrangler.toml          # Cloudflare Pages + D1 绑定配置
+└── .github/workflows/     # deploy.yml（构建验证 + Cloudflare Pages 部署 + D1 记录）
 ```
+
+部署架构：Cloudflare Pages（静态托管 + CDN）+ Pages Functions（只读 API）+ D1（发布历史/内容索引）。详见 `architecture.md` 与 [DEPLOY-CHECKLIST.md](DEPLOY-CHECKLIST.md)。
 
 ## 设计系统架构
 
@@ -131,17 +134,17 @@ githubUrl: "…"             # 仅 resource 可选
 ```bash
 git add content/ src/
 git commit -m "feat: publish YOLO26 ONNX article"
-git push origin main           # 构建验证 + 推送 GHCR 镜像（build-N 版本，不部署）
+git push origin main           # 构建验证（不部署）
 
-./scripts/release.sh v1.0.0    # 打 tag 发布正式版本并触发部署
+./scripts/release.sh v1.0.0    # 打 tag 发布正式版本，触发 Cloudflare 部署
 ```
 
-CI 流程（`.github/workflows/deploy.yml`）：内容校验 → 构建 → 推送 GHCR 镜像；**部署仅在打 `v*` 标签或手动触发时执行**（push main 不部署）：生成内容索引 SQL 并上传 → SSH 到 1Panel 服务器执行 `deploy/deploy.sh` → 健康检查 → 写入 PostgreSQL `deployments` 表 → 失败自动回滚镜像配置。
+CI 流程（`.github/workflows/deploy.yml`）：内容校验 → 构建；**部署仅在打 `v*` 标签或手动触发时执行**（push main 不部署）：`wrangler pages deploy dist` → 内容索引 SQL 写入 D1 → `record-deployment.mjs` 记录发布版本并更新当前版本指针。
 
-服务器侧需在 `/opt/creative-site/` 放置 `compose.yaml` 与 `.env.production`（参考 `deploy/.env.production.example`），数据库首次启动自动执行 `db/migrations/001_init.sql`；`deployments` 只记录发布事件，恢复历史版本依赖保留的 Git commit 与镜像。
+首次部署前按 [DEPLOY-CHECKLIST.md](DEPLOY-CHECKLIST.md) 创建 Cloudflare 资源（D1 数据库、API Token、GitHub Secrets）。回滚：Cloudflare Dashboard → Pages 项目 → Deployments 一键回滚到任意历史快照。
 
-### PostgreSQL 数据链路
+### D1 数据链路
 
-- **内容索引**：`scripts/sync-content-db.mjs` 扫描 `content/` 生成幂等 upsert SQL（本地可运行 `node scripts/sync-content-db.mjs > contents.sql` 预览），CI 上传服务器后由 `deploy.sh` 写入 `contents` 表，与 Git 中 Markdown 保持一致（含已删除内容的清理）。
-- **发布记录**：每次部署成功写入 `deployments` 表一条记录（版本号 / commit SHA / 镜像引用 / 时间）。
-- **版本元数据读取**：部署成功后 `deploy.sh` 将最近 50 条成功发布导出为 `/opt/creative-site/data/history.json`，经 compose bind mount 由 nginx 以 `/data/history.json` 静态提供；`/history` 版本档案页客户端拉取渲染，无需运行时数据库连接。
+- **内容索引**：`scripts/sync-content-db.mjs` 扫描 `content/` 生成幂等 upsert SQL（SQLite 方言，本地可运行 `node scripts/sync-content-db.mjs > contents.sql` 预览），CI 通过 `wrangler d1 execute --remote` 写入 `contents` 表，与 Git 中 Markdown 保持一致（含已删除内容的清理）。
+- **发布记录**：`scripts/record-deployment.mjs` 在部署成功后写入 `deployments` 表（版本号 / commit SHA / Pages 部署 URL / 时间，release_version 幂等，3 次指数退避重试），并更新 `site_current_release` 当前版本指针。
+- **版本元数据读取**：Pages Function `functions/api/deployments.js` 提供 `GET /api/deployments` 只读接口（最近 50 条 success 记录）；`/history` 版本档案页客户端拉取渲染，卡片附 Pages 历史预览链接（每次部署的不可变快照 URL）。

@@ -8,19 +8,15 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 concurrency:
   group: production-deploy
   cancel-in-progress: false
 
 jobs:
+  # 每次 push：内容校验 + 构建验证（不部署）
   build:
     runs-on: ubuntu-latest
-    outputs:
-      image: ${{ steps.meta.outputs.image }}
-      version: ${{ steps.meta.outputs.version }}
-      sha: ${{ steps.meta.outputs.sha }}
 
     steps:
       - name: Checkout
@@ -41,45 +37,13 @@ jobs:
       - name: Build site
         run: npm run build
 
-      - name: Set image metadata
-        id: meta
-        shell: bash
-        run: |
-          OWNER="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
-          echo "image=ghcr.io/${OWNER}/my-creative-site:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
-          echo "sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
-
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            VERSION="${GITHUB_REF_NAME}"
-          else
-            VERSION="build-${GITHUB_RUN_NUMBER}"
-          fi
-
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: deploy/Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.image }}
-
+  # 打 v* 标签或手动触发：部署到 Cloudflare Pages 并记录发布历史到 D1
+  # 需在仓库 Secrets 配置 CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID
   deploy:
     needs: build
     runs-on: ubuntu-latest
     environment: production
-    # 服务器未就绪前：push main 只构建验证，打 v* 标签或手动触发才部署
+    # Cloudflare 资源未就绪前：push main 只构建验证，打 v* 标签或手动触发才部署
     if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
 
     steps:
@@ -90,32 +54,53 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build site
+        run: npm run build
+
+      - name: Set metadata
+        id: meta
+        shell: bash
+        run: |
+          echo "sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF_NAME}"
+          else
+            VERSION="build-${GITHUB_RUN_NUMBER}"
+          fi
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to Cloudflare Pages
+        id: pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=my-creative-site
 
       - name: Generate content index SQL
         run: node scripts/sync-content-db.mjs > contents.sql
 
-      - name: Upload content index SQL
-        uses: appleboy/scp-action@v0.1.7
+      - name: Sync content index to D1
+        uses: cloudflare/wrangler-action@v3
         with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "contents.sql"
-          target: "/opt/creative-site/"
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: d1 execute creative-site-db --remote --file=contents.sql
 
-      - name: Deploy to 1Panel server
-        uses: appleboy/ssh-action@v1
+      - name: Record deployment to D1
         env:
-          RELEASE_VERSION: ${{ needs.build.outputs.version }}
-          IMAGE_REF: ${{ needs.build.outputs.image }}
-          GIT_SHA: ${{ needs.build.outputs.sha }}
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          envs: RELEASE_VERSION,IMAGE_REF,GIT_SHA
-          script: |
-            /opt/creative-site/deploy.sh \
-              "$RELEASE_VERSION" \
-              "$IMAGE_REF" \
-              "$GIT_SHA"
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          node scripts/record-deployment.mjs \
+            "${{ steps.meta.outputs.version }}" \
+            "${{ steps.meta.outputs.sha }}" \
+            "${{ steps.pages.outputs.deployment-url }}" \
+            "${{ github.actor }}"

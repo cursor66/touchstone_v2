@@ -1,7 +1,9 @@
 /**
  * 内容索引同步：扫描 content/ 下所有 Markdown，生成幂等 SQL（stdout），
- * 将内容元数据 upsert 进 PostgreSQL contents 表。
- * 用法：node scripts/sync-content-db.mjs > contents.sql
+ * 将内容元数据 upsert 进 Cloudflare D1 contents 表（SQLite 方言）。
+ * 用法：
+ *   node scripts/sync-content-db.mjs > contents.sql
+ *   npx wrangler d1 execute creative-site-db --remote --file=contents.sql
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -53,24 +55,22 @@ for (const type of ['articles', 'videos', 'resources']) {
 }
 
 console.log('-- 由 scripts/sync-content-db.mjs 生成，请勿手改');
-console.log('BEGIN;');
 for (const r of rows) {
   console.log(
-    `INSERT INTO contents (slug, title, content_type, summary, cover_url, status, source_path, updated_at)\n` +
-      `VALUES (${q(r.slug)}, ${q(r.title)}, ${q(r.content_type)}, ${q(r.summary)}, ${q(r.cover_url)}, ${q(r.status)}, ${q(r.source_path)}, NOW())\n` +
+    `INSERT INTO contents (id, slug, title, content_type, summary, cover_url, status, source_path, updated_at)\n` +
+      `VALUES (${q(r.slug)}, ${q(r.slug)}, ${q(r.title)}, ${q(r.content_type)}, ${q(r.summary)}, ${q(r.cover_url)}, ${q(r.status)}, ${q(r.source_path)}, datetime('now'))\n` +
       `ON CONFLICT (slug) DO UPDATE SET\n` +
-      `  title = EXCLUDED.title,\n` +
-      `  content_type = EXCLUDED.content_type,\n` +
-      `  summary = EXCLUDED.summary,\n` +
-      `  cover_url = EXCLUDED.cover_url,\n` +
-      `  status = EXCLUDED.status,\n` +
-      `  source_path = EXCLUDED.source_path,\n` +
-      `  updated_at = NOW();`,
+      `  title = excluded.title,\n` +
+      `  content_type = excluded.content_type,\n` +
+      `  summary = excluded.summary,\n` +
+      `  cover_url = excluded.cover_url,\n` +
+      `  status = excluded.status,\n` +
+      `  source_path = excluded.source_path,\n` +
+      `  updated_at = datetime('now');`,
   );
 }
 // 删除库中存在但 Git 中已移除的内容索引
 console.log(
   `DELETE FROM contents WHERE slug NOT IN (${rows.map((r) => q(r.slug)).join(', ') || "''"});`,
 );
-console.log('COMMIT;');
 console.error(`已生成 ${rows.length} 条内容索引 SQL`);
