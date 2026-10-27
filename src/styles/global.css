@@ -47,3 +47,15 @@ body {
 }
 .prose-content img { @apply rounded-xl my-6; }
 .prose-content hr { @apply border-gray-200 my-8; }
+.prose-content table {
+  @apply w-full text-sm my-6 border-collapse;
+}
+.prose-content thead { @apply bg-gray-50; }
+.prose-content th {
+  @apply text-left font-semibold text-gray-900 border border-gray-200 px-4 py-2;
+}
+.prose-content td {
+  @apply text-gray-700 border border-gray-200 px-4 py-2 align-top;
+}
+.prose-content tbody tr:nth-child(even) { @apply bg-gray-50/50; }
+.prose-content .katex-display { @apply overflow-x-auto py-1; }
