@@ -2,12 +2,11 @@
 /**
  * 内容详情页模板：三类内容的详情页共用。
  * - article：标准正文排版
- * - video：正文前显示观看入口
+ * - video：B站 / YouTube 式版面，播放器置顶（embedHtml 嵌入码或 videoUrl 直链）
  * - resource：正文前显示下载 / GitHub 入口
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Button from '../ui/Button.astro';
-import Icon from '../ui/Icon.astro';
 import type { AnyEntry } from '../../utils/content';
 
 interface Props {
@@ -21,17 +20,30 @@ const { data } = entry;
 
 <BaseLayout title={data.title} description={data.summary}>
   <main class="max-w-7xl mx-auto px-4 py-12">
-    <article class="max-w-2xl mx-auto">
+    <article class:list={['mx-auto', type === 'video' ? 'max-w-4xl' : 'max-w-2xl']}>
+
+      {/* 视频页：播放器置顶（B站 / YouTube 式版面）。embedHtml 优先，其次直链 videoUrl */}
+      {type === 'video' && (data.embedHtml || data.videoUrl) && (
+        <div class="aspect-video bg-black rounded-xl overflow-hidden mb-6">
+          {data.embedHtml ? (
+            <div class="video-embed w-full h-full" set:html={data.embedHtml} />
+          ) : (
+            <video
+              src={data.videoUrl}
+              poster={data.cover}
+              controls
+              preload="metadata"
+              class="w-full h-full"
+            />
+          )}
+        </div>
+      )}
+
       <h1 class="text-3xl font-bold text-gray-900 leading-tight mb-4">{data.title}</h1>
 
-      <img src={data.cover} alt={data.title} class="w-full rounded-xl mb-8" />
-
-      {(type === 'video' && data.videoUrl) && (
-        <div class="mb-8">
-          <Button href={data.videoUrl} class="w-full sm:w-auto">
-            <Icon name="play" class="w-3 h-3 mr-2" /> 观看视频
-          </Button>
-        </div>
+      {/* 视频页用播放器代替头图（无播放源时回退封面）；文章 / 资源页保留封面图 */}
+      {(type !== 'video' || (!data.embedHtml && !data.videoUrl)) && (
+        <img src={data.cover} alt={data.title} class="w-full rounded-xl mb-8" />
       )}
 
       {(type === 'resource' && (data.downloadUrl || data.githubUrl)) && (
@@ -49,22 +61,10 @@ const { data } = entry;
         <slot />
       </div>
 
-      {data.tags.length > 0 && (
-        <div class="flex flex-wrap gap-2 mt-10">
-          {data.tags.map((tag) => (
-            <span class="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full">{tag}</span>
-          ))}
-        </div>
-      )}
-
-      <!-- 评论区（自建：记录 + 展示；观看数自建统计，每会话每篇计一次） -->
+      <!-- 评论区（自建：记录 + 展示） -->
       <section id="comments" class="mt-12 pt-8 border-t border-gray-100">
-        <div class="flex items-baseline justify-between mb-6">
+        <div class="mb-6">
           <h2 class="text-lg font-bold text-gray-900">评论</h2>
-          <span class="text-xs text-gray-400 flex items-center">
-            <Icon name="eye" class="w-3.5 h-3.5 mr-1" />
-            <span id="view-count">{data.views}</span> 次阅读
-          </span>
         </div>
 
         <form id="comment-form" class="mb-8">
@@ -105,7 +105,8 @@ const { data } = entry;
       const res = await fetch(STATS_API);
       const data = await res.json();
       if (typeof data.views === 'number') {
-        document.getElementById('view-count').textContent = data.views;
+        const el = document.getElementById('view-count');
+        if (el) el.textContent = data.views;
       }
     } catch { /* 降级：保留 frontmatter 初始值 */ }
   })();

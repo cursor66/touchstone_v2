@@ -18,6 +18,8 @@ const baseSchema = z.object({
   comments: z.number().default(0),
   views: z.number().default(0),
   videoUrl: z.string().optional(),
+  /** 第三方播放器嵌入代码（如 B站 iframe），与 videoUrl 二选一，优先 embedHtml */
+  embedHtml: z.string().optional(),
   downloadUrl: z.string().optional(),
   githubUrl: z.string().optional(),
   /** 所属精选系列：ai（AI 赋能计划）/ kids（童趣智育）/ project（项目成果） */

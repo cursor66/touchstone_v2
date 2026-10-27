@@ -59,3 +59,8 @@ body {
 }
 .prose-content tbody tr:nth-child(even) { @apply bg-gray-50/50; }
 .prose-content .katex-display { @apply overflow-x-auto py-1; }
+
+/* 视频嵌入：B站等第三方播放器 iframe 填满 16:9 容器 */
+.video-embed iframe {
+  @apply w-full h-full border-0;
+}

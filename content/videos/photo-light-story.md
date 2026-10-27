@@ -10,7 +10,7 @@ status: "published"
 likes: 88
 comments: 21
 views: 1430
-videoUrl: "https://example.com/videos/light-story"
+embedHtml: '<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=405826286&bvid=BV1KV411P79B&cid=1264324389&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>'
 ---
 
 # 摄影入门：如何利用光影讲好一个故事
