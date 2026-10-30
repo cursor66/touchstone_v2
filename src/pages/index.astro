@@ -68,6 +68,9 @@ for (const { entry } of items) {
         <p class="text-sm text-gray-500">没有匹配的内容，换个关键词或分类试试。</p>
       </div>
 
+      <!-- 翻页组件：内容 ≤9 个时自动隐藏 -->
+      <nav id="content-pager" class="mt-8 hidden items-center justify-center gap-2 text-sm" aria-label="内容分页"></nav>
+
       <!-- 精选系列专题 -->
       <div class="mt-16">
         <SectionHeading title="精选系列专题" linkText="查看所有专题" linkHref="/articles/" />
@@ -101,6 +104,9 @@ for (const { entry } of items) {
 
     let sortBy = 'new';
     let query = '';
+    let page = 1;
+    const PAGE_SIZE = 9;
+    const pager = document.getElementById('content-pager');
 
     // Header 搜索框：输入即筛选（首页），回车跳转到首页带关键词
     const search = document.querySelector('[data-search-input]');
@@ -108,6 +114,66 @@ for (const { entry } of items) {
     if (params.get('q')) {
       query = params.get('q').toLowerCase();
       if (search) search.value = params.get('q');
+    }
+
+    function pagerBtn(label, opts) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = label;
+      btn.className =
+        'min-w-8 h-8 px-2 rounded-lg border transition ' +
+        (opts.active
+          ? 'bg-blue-600 text-white border-blue-600'
+          : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50') +
+        (opts.disabled ? ' opacity-40 cursor-not-allowed' : '');
+      if (opts.disabled) btn.disabled = true;
+      if (opts.page) {
+        btn.addEventListener('click', () => {
+          page = opts.page;
+          apply();
+          grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+      return btn;
+    }
+
+    // 页码序列：页数多时折叠为 1 … c-1 c c+1 … last
+    function pageNumbers(total, current) {
+      if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+      const set = new Set([1, total, current - 1, current, current + 1]);
+      const list = Array.from(set).filter((n) => n >= 1 && n <= total).sort((a, b) => a - b);
+      const out = [];
+      let prev = 0;
+      for (const n of list) {
+        if (prev && n - prev > 1) out.push('…');
+        out.push(n);
+        prev = n;
+      }
+      return out;
+    }
+
+    function renderPager(totalPages) {
+      pager.innerHTML = '';
+      if (totalPages <= 1) {
+        pager.classList.add('hidden');
+        pager.classList.remove('flex');
+        return;
+      }
+      pager.classList.remove('hidden');
+      pager.classList.add('flex');
+
+      pager.appendChild(pagerBtn('‹ 上一页', { disabled: page === 1, page: page - 1 }));
+      pageNumbers(totalPages, page).forEach((n) => {
+        if (n === '…') {
+          const span = document.createElement('span');
+          span.textContent = '…';
+          span.className = 'px-1 text-gray-400';
+          pager.appendChild(span);
+        } else {
+          pager.appendChild(pagerBtn(String(n), { active: n === page, page: n }));
+        }
+      });
+      pager.appendChild(pagerBtn('下一页 ›', { disabled: page === totalPages, page: page + 1 }));
     }
 
     function apply() {
@@ -129,11 +195,23 @@ for (const { entry } of items) {
       );
       visible.forEach((el) => grid.appendChild(el));
 
+      // 分页：只显示当前页的 9 个
+      const totalPages = Math.ceil(visible.length / PAGE_SIZE);
+      if (page > totalPages) page = Math.max(1, totalPages);
+      visible.forEach((el, i) => {
+        const inPage = i >= (page - 1) * PAGE_SIZE && i < page * PAGE_SIZE;
+        el.classList.toggle('hidden', !inPage);
+      });
+      renderPager(totalPages);
+
       empty.classList.toggle('hidden', visible.length > 0);
       grid.classList.toggle('hidden', visible.length === 0);
     }
 
-    filter.addEventListener('change', apply);
+    filter.addEventListener('change', () => {
+      page = 1;
+      apply();
+    });
 
     sortBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -149,6 +227,7 @@ for (const { entry } of items) {
           b.classList.toggle('border-gray-200', !active);
           b.classList.toggle('hover:bg-gray-50', !active);
         });
+        page = 1;
         apply();
       });
     });
@@ -156,6 +235,7 @@ for (const { entry } of items) {
     if (search) {
       search.addEventListener('input', () => {
         query = search.value.trim().toLowerCase();
+        page = 1;
         apply();
       });
     }
