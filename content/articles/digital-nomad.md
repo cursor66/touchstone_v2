@@ -1,6 +1,7 @@
 ---
 title: "我的数字游民生活：在不同的城市寻找创作灵感"
 type: "article"
+series: "kids"
 date: 2026-10-12
 summary: "在不同城市里寻找创作节奏。"
 cover: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=digital%20nomad%20working%20on%20laptop%20in%20a%20seaside%20cafe%2C%20travel%20photography%2C%20golden%20hour&image_size=landscape_16_9"

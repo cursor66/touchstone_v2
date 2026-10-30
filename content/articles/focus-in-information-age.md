@@ -1,6 +1,7 @@
 ---
 title: "数字时代的时间管理：在信息洪流中保持专注"
 type: "article"
+series: "kids"
 date: 2026-10-05
 summary: "在信息洪流中守住注意力。"
 cover: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=hourglass%20beside%20a%20smartphone%20on%20dark%20desk%2C%20concept%20of%20focus%20and%20time%2C%20dramatic%20lighting&image_size=landscape_16_9"

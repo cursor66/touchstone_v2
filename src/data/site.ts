@@ -7,7 +7,7 @@ export const site = {
   quote: '与更好的自己相遇',
   description: '分享创作、学习和生活中的点滴。',
   copyright: `© ${new Date().getFullYear()} 心之所向. All rights reserved.`,
-  buildNote: '本网站由 AI 辅助构建 | 持续学习，持续输出',
+  buildNote: 'All in ai | 持续学习，持续输出',
 };
 
 export const socials = [

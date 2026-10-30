@@ -13,8 +13,6 @@ comments: 12
 views: 1280
 ---
 
-# MOSS-Image 深度解读技术文档
-
 > **论文标题**: MOSS-Image Technical Report
 > **发布机构**: MOSI.AI / SII / 复旦大学 / 上海交通大学
 > **arXiv ID**: arXiv:2610.23374

@@ -1,6 +1,7 @@
----
+﻿---
 title: "创意写作的灵感源泉：如何捕捉生活中的闪光点"
 type: "article"
+series: "project"
 date: 2026-10-02
 summary: "灵感来自对生活的敏感。"
 cover: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=vintage%20typewriter%20with%20scattered%20papers%20and%20warm%20lamp%20light%2C%20cozy%20writing%20corner%2C%20film%20style&image_size=landscape_16_9"

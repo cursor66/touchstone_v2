@@ -9,7 +9,7 @@ export const series = [
     description: '系统探索 AI 工具如何改变阅读、写作与工作流，提升数字化核心竞争力。',
     icon: 'robot',
     color: 'blue',
-    href: '/articles/',
+    href: '/series/ai/',
   },
   {
     id: 'kids',
@@ -17,7 +17,7 @@ export const series = [
     description: '从认知启蒙到习惯养成，分享那些真正能驱动孩子成长的思考与实践。',
     icon: 'seedling',
     color: 'emerald',
-    href: '/articles/',
+    href: '/series/kids/',
   },
   {
     id: 'project',
@@ -25,6 +25,6 @@ export const series = [
     description: '用技术与创意沉淀成果，记录项目从 0 到 1 的实践过程、思考与收获。',
     icon: 'camera-retro',
     color: 'orange',
-    href: '/videos/',
+    href: '/series/project/',
   },
 ] as const;

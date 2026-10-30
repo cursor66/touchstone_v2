@@ -1,6 +1,7 @@
----
+﻿---
 title: "日落时分的思考：为什么我们需要慢下来去感受生活"
 type: "article"
+series: "project"
 date: 2026-10-08
 summary: "慢下来，才能感受生活。"
 cover: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=person%20silhouette%20watching%20sunset%20over%20calm%20lake%2C%20warm%20orange%20sky%2C%20peaceful%20mood%2C%20photography&image_size=landscape_16_9"

@@ -22,8 +22,8 @@ const baseSchema = z.object({
   embedHtml: z.string().optional(),
   downloadUrl: z.string().optional(),
   githubUrl: z.string().optional(),
-  /** 所属精选系列：ai（AI 赋能计划）/ kids（童趣智育）/ project（项目成果） */
-  series: z.enum(['ai', 'kids', 'project']).optional(),
+  /** 所属系列标签，任意字符串；ai/kids/project 对应首页三张精选专题卡 */
+  series: z.string().optional(),
 });
 
 const articles = defineCollection({
