@@ -1,4 +1,4 @@
-﻿---
+---
 title: "日落时分的思考：为什么我们需要慢下来去感受生活"
 type: "article"
 series: "project"

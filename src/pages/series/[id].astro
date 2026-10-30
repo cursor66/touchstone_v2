@@ -3,15 +3,14 @@
  * 系列专题页：/series/ai/ 等，按 frontmatter 的 series 标签聚合三类内容，
  * 标题即专题名，与首页专题卡片的「N 篇内容」一一对应。
  */
-import type { GetStaticPaths } from 'astro';
 import CollectionPage from '../../components/layout/CollectionPage.astro';
 import { series } from '../../data/series';
 import { getAllContent } from '../../utils/content';
 
-export const getStaticPaths: GetStaticPaths = async () => {
+export async function getStaticPaths() {
   const items = await getAllContent();
   // 除三张固定专题卡外，允许内容使用任意 series 标签，均生成对应聚合页
-  const ids = new Set(items.map((i) => i.entry.data.series).filter(Boolean));
+  const ids = new Set<string>(items.map((i) => i.entry.data.series).filter((s): s is string => Boolean(s)));
   series.forEach((s) => ids.add(s.id));
   return Array.from(ids).map((id) => ({
     params: { id },
@@ -20,7 +19,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
       items: items.filter((i) => i.entry.data.series === id),
     },
   }));
-};
+}
 
 const { title, items } = Astro.props;
 ---

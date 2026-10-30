@@ -14,8 +14,8 @@ const TYPES = ['article', 'video', 'resource'];
 const STATUSES = ['draft', 'published', 'archived'];
 
 function parseFrontmatter(file) {
-  // 统一换行符，避免 CRLF 检出（Windows autocrlf）导致解析失败
-  const text = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
+  // 统一换行符（Windows autocrlf），并去除 UTF-8 BOM（部分编辑器写入时附带）
+  const text = fs.readFileSync(file, 'utf8').replace(/﻿/, '').replace(/\r\n/g, '\n');
   const match = text.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return null;
   const data = {};
