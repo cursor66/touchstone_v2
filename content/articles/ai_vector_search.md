@@ -540,3 +540,6 @@ collection.release()
 ---
 
 > 想深入实践？建议路径：先用 FAISS 跑通 `IndexFlatL2` → 再试 `IndexIVFPQ` → 最后上 `IndexHNSWFlat`，亲手调一次 `efSearch`，感受召回率与延迟的此消彼长。理论就到此为止，剩下的都是工程手感。
+
+---
+![公众号](https://child-1323116912.cos.ap-guangzhou.myqcloud.com/picture_book_library_test/images/wechat.png)
