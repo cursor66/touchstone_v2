@@ -68,7 +68,7 @@ function remarkBracketMath() {
     node.children = out;
   }
 
-  return (tree) => walk(tree);
+  return (/** @type {any} */ tree) => walk(tree);
 }
 
 // https://astro.build/config
