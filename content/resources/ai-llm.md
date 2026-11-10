@@ -1,7 +1,7 @@
 ---
 title: "LLM大模型智能引擎实战：SpringAI+RAG+MCP+实时搜索"
 type: "resource"
-series: "project"
+series: "resource"
 date: 2026-10-17
 summary: "SpringAI+RAG+MCP+实时搜索。"
 cover: "https://child-1323116912.cos.ap-guangzhou.myqcloud.com/picture_book_library_test/images/LLM%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%99%BA%E8%83%BD%E5%BC%95%E6%93%8E%E5%AE%9E%E6%88%98%E5%B0%81%E9%9D%A2.png"
