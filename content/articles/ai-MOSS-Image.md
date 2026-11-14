@@ -528,5 +528,4 @@ MOSS-Image 证明了开源模型在密集文本和复杂布局生成领域可以
 
 ---
 
-*文档撰写日期: 2026年10月27日*
-*基于 arXiv:2610.23374v1 技术报告及 GitHub 开源仓库信息整理*
+![公众号](https://child-1323116912.cos.ap-guangzhou.myqcloud.com/picture_book_library_test/images/wechat.png)

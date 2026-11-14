@@ -652,3 +652,5 @@ LTX-2 代表了开源视频生成模型的一个重要里程碑：**从纯视觉
 > - Hugging Face: [Lightricks/LTX-Video](https://huggingface.co/Lightricks/LTX-Video)
 > - 论文: arXiv:2501.00103 (LTX-Video: Realtime Video Latent Diffusion)
 > - 在线体验: [LTX-Studio](https://www.ltx.studio)
+
+![公众号](https://child-1323116912.cos.ap-guangzhou.myqcloud.com/picture_book_library_test/images/wechat.png)

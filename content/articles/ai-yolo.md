@@ -147,3 +147,6 @@ YOLO 提供两种常见输入处理模式：
 这对移动端 YOLO11n OBB 推理是有价值的。
 
 还有一个重要细节： `rect=True` 通常要求同一批次图片具有相同的尺寸比例，且在 Ultralytics 的预测流程中，使用默认 `rect='auto'` 时，还会根据模型是否支持动态输入等条件决定是否启用最小矩形填充。
+
+
+![公众号](https://child-1323116912.cos.ap-guangzhou.myqcloud.com/picture_book_library_test/images/wechat.png)

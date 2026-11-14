@@ -36,20 +36,5 @@ views: 2150
 
 processor/tokenizer：负责对输入内容进行预处理和分词，把原始素材转换成模型能输入的格式。
 
-## 小节一
-
-这里是正文段落。你可以替换成自己的创作：支持 **加粗**、列表、引用与代码块。
-
-- 要点一
-- 要点二
-- 要点三
-
-> 与设计系统保持一致的内容排版，让阅读体验更专注。
-
-## 小节二
-
-```bash
-git add content/ && git commit -m 'publish' && git push
-```
-
-推送后即可自动构建上线。
+----
+![公众号](https://child-1323116912.cos.ap-guangzhou.myqcloud.com/picture_book_library_test/images/wechat.png)

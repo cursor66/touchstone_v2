@@ -36,5 +36,7 @@ network_mode = personal_cloud
 ## 启动
 ```
 python main.py --enable-manager --listen
+
+http://10.6.14.15:8188
 ```
 
